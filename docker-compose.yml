@@ -1,0 +1,30 @@
+
+services:
+  web:
+    build:
+      context: ./ 
+      dockerfile: Dockerfile
+    command: >
+      gunicorn --env DJANGO_SETTINGS_MODULE=restaurante.settings
+      restaurante.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/root/restaurante/staticfiles
+      - media_volume:/root/restaurante/mediafiles
+    expose:
+      - "8000"
+    env_file:
+      - ./.env
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/root/restaurante/staticfiles
+      - media_volume:/root/restaurante/mediafiles
+    ports:
+      - "30000:80"   # Cambié a 10000
+    depends_on:
+      - web
+
+volumes:
+  static_volume:
+  media_volume:

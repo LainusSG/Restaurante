@@ -7,35 +7,50 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f2f2f2;
+            background: #121212; /* Fondo oscuro */
+            color: #e0e0e0;      /* Texto gris claro */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
         .login-box {
-            background: white;
+            background: #1e1e1e; /* Caja oscura */
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            width: 300px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 320px;
         }
         .login-box h2 {
             text-align: center;
             margin-bottom: 20px;
+            color: #ffffff;
         }
         .login-box input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            width: 92%;
+            padding: 12px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #ffffff;
+        }
+        .login-box input:focus {
+            outline: none;
+            background: #333333;
+            box-shadow: 0 0 0 2px #007bff;
         }
         .login-box button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
         .login-box button:hover {
             background: #0056b3;
