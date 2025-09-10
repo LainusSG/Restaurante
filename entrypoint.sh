@@ -14,4 +14,4 @@ python manage.py migrate --run-syncdb --settings=WSGI_APPLICATION = 'restaurante
 .settings
 
 echo 'Running server...'
-gunicorn --env DJANGO_SETTINGS_MODULE=core.settings core.wsgi:application --bind 0.0.0.0:8000
+gunicorn --env DJANGO_SETTINGS_MODULE=restaurante.settings restaurante.wsgi:application --bind 0.0.0.0:8000
