@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Menú del Restaurante</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            margin: 0;
+            padding: 20px;
+            color: #f5f5f5;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            color: #e74c3c; /* Rojo vino */
+        }
+
+        /* Layout general */
+        .container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        /* Sección menú */
+        .menu {
+            flex: 2;
+        }
+
+        .categoria {
+            margin-bottom: 30px;
+        }
+
+        .productos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .producto {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            text-align: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .producto:hover {
+            transform: translateY(-3px);
+            background: #2a2a2a;
+        }
+
+        .producto h4 {
+            margin: 10px 0 5px;
+            color: #f1f1f1;
+        }
+
+        .producto p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        .producto a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: #e74c3c;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .producto a:hover {
+            background: #ff5c5c;
+        }
+
+        /* Pedido */
+        .pedido {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            position: sticky;
+            top: 20px;
+        }
+
+        .pedido h2 {
+            color: #27ae60;
+        }
+
+        .pedido ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pedido li {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pedido li span {
+            color: #ddd;
+        }
+
+        .pedido li a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .pedido li a:hover {
+            text-decoration: underline;
+        }
+
+        .pedido button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .pedido button:hover {
+            background: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 Menú del Restaurante</h1>
+
+    <div class="container">
+        <!-- Menú -->
+        <div class="menu">
+            <h2>🍽 Categorías</h2>
+            {% for categoria in categorias %}
+                <div class="categoria">
+                    <h3>{{ categoria.nombre }}</h3>
+                    <div class="productos">
+                        {% for producto in categoria.productos.all %}
+                            <div class="producto">
+                                {% if producto.imagen %}
+                                    <img src="{{ producto.imagen.url }}" width="150" style="border-radius: 8px;">
+                                {% endif %}
+                                <h4>{{ producto.nombre }}</h4>
+                                <p>${{ producto.precio }}</p>
+                                <a href="{% url 'agregar_al_pedido' producto.id %}">➕ Agregar</a>
+                            </div>
+                        {% empty %}
+                            <p>No hay productos en esta categoría</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pedido -->
+        <div class="pedido">
+            <h2>🛒 Pedido Actual</h2>
+            {% if pedido %}
+                <ul>
+                    {% for item in pedido.items.all %}
+                        <li>
+                            <span>{{ item.producto.nombre }} (x{{ item.cantidad }})</span>
+                            <span>${{ item.subtotal }}</span>
+                            <a href="{% url 'eliminar_item_pedido' item.id %}">❌</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Total: ${{ pedido.total }}</strong></p>
+                <form method="post" action="{% url 'confirmar_pedido' pedido.id %}">
+                    {% csrf_token %}
+                    <button type="submit">✅ Confirmar Pedido</button>
+                </form>
+            {% else %}
+                <p>No tienes productos en tu pedido.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket Pedido #{{ pedido.id }}</title>
+    <style>
+        body {
+            font-family: monospace, sans-serif;
+            font-size: 13px;
+            width: 240px; /* ajusta según impresora (58mm ≈ 230-250px) */
+            margin: auto;
+            color: #000;
+        }
+        h1 {
+            text-align: center;
+            font-size: 15px;
+            margin: 0 0 10px;
+            text-transform: uppercase;
+        }
+        hr {
+            border: none;
+            border-top: 1px dashed #000;
+            margin: 6px 0;
+        }
+        .linea {
+            display: flex;
+            justify-content: space-between;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            margin-bottom: 4px;
+        }
+        .total {
+            text-align: right;
+            font-size: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+        @media print {
+            button { display: none; } /* Ocultar botón en impresión */
+            body { margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🍽 Restaurante XYZ</h1>
+    <p><strong>Ticket:</strong> #{{ pedido.id }}</p>
+    <p><strong>Fecha:</strong> {{ pedido.creado_en|date:"d/m/Y H:i" }}</p>
+    <hr>
+    <ul>
+        {% for item in pedido.items.all %}
+            <li class="linea">
+                <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                <span>${{ item.subtotal }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <p class="total">TOTAL: ${{ pedido.total }}</p>
+    <hr>
+    <div class="footer">
+        ¡Gracias por tu compra!  
+        <br>🛎 Restaurante XYZ
+    </div>
+
+    <button onclick="imprimirYVolver()">🖨 Imprimir Ticket</button>
+
+<script>
+function imprimirYVolver() {
+    window.print();
+    // Espera un poco para que dé tiempo a la impresión antes de redirigir
+    setTimeout(() => {
+        window.location.href = "{% url 'cocina' %}";
+    }, 500);
+}
+</script>
+</body>
+</html>

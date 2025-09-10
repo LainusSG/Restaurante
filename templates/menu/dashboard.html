@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>📊 Dashboard de Ventas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        h1 { color: #e74c3c; }
+        h2 { color: #3498db; }
+
+        /* Filtros */
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            background: #1e1e1e;
+            color: #f5f5f5;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: 2px solid #e74c3c;
+        }
+
+        /* Gráfica */
+        canvas {
+            display: block;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        /* Tabla */
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background: #1e1e1e;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+
+        thead {
+            background: #e74c3c;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        th {
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #2a2a2a;
+        }
+
+        tr:nth-child(odd) {
+            background: #1e1e1e;
+        }
+
+        td {
+            color: #ddd;
+        }
+
+        /* Paginador */
+        .pagination {
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            background: #1e1e1e;
+            color: #f5f5f5;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .pagination a:hover {
+            background: #e74c3c;
+        }
+
+        .pagination .active {
+            background: #e74c3c;
+            font-weight: bold;
+        }
+
+        .pagination .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Historial de Ventas</h1>
+
+    <!-- Filtros -->
+    <form method="get">
+        <select name="filtro" onchange="this.form.submit()">
+            <option value="dia" {% if filtro == "dia" %}selected{% endif %}>Por Día</option>
+            <option value="semana" {% if filtro == "semana" %}selected{% endif %}>Por Semana</option>
+            <option value="mes" {% if filtro == "mes" %}selected{% endif %}>Por Mes</option>
+            <option value="año" {% if filtro == "año" %}selected{% endif %}>Por Año</option>
+        </select>
+    </form>
+
+    <!-- Gráfica -->
+    <canvas id="ventasChart"></canvas>
+
+    <script>
+    const ctx = document.getElementById('ventasChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Ventas',
+                data: {{ valores|safe }},
+                borderWidth: 2,
+                backgroundColor: "rgba(231, 76, 60, 0.6)",
+                borderColor: "#e74c3c"
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: "#f5f5f5" } }
+            },
+            scales: {
+                x: { ticks: { color: "#ddd" } },
+                y: { 
+                    beginAtZero: true,
+                    ticks: { color: "#ddd" },
+                    grid: { color: "#333" }
+                }
+            }
+        }
+    });
+    </script>
+
+    <!-- Tabla -->
+    <h2>📄 Detalle de Ventas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Periodo</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+         {% for d in datos %}
+            <tr>
+                <td>{{ d.periodo|date:"d/m/Y" }}</td>
+                <td>${{ d.total }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginador -->
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1&filtro={{ filtro }}">⏮ Primero</a>
+            <a href="?page={{ page_obj.previous_page_number }}&filtro={{ filtro }}">⬅ Anterior</a>
+        {% else %}
+            <span class="disabled">⏮ Primero</span>
+            <span class="disabled">⬅ Anterior</span>
+        {% endif %}
+
+        <span class="active">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&filtro={{ filtro }}">Siguiente ➡</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}&filtro={{ filtro }}">Último ⏭</a>
+        {% else %}
+            <span class="disabled">Siguiente ➡</span>
+            <span class="disabled">Último ⏭</span>
+        {% endif %}
+    </div>
+</body>
+</html>

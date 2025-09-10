@@ -1,0 +1,7 @@
+<h1>📊 Ventas del día</h1>
+{% if ventas %}
+    <p>Fecha: {{ ventas.fecha }}</p>
+    <h2>Total vendido: ${{ ventas.total }}</h2>
+{% else %}
+    <p>No hay ventas registradas hoy.</p>
+{% endif %}

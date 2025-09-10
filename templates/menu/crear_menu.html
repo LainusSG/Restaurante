@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>📋 Administrar Menú</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e67e22;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #f1c40f;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #fff;
+        }
+
+        /* Barra de acciones */
+        .acciones {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .acciones a {
+            display: inline-block;
+            margin: 0 8px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            background: #e67e22;
+            color: #fff;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .acciones a:hover {
+            background: #d35400;
+        }
+
+        /* Grid de productos */
+        ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        li {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+        }
+
+        img {
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .nombre {
+            font-size: 18px;
+            margin: 10px 0 5px;
+            color: #2ecc71;
+        }
+
+        .precio {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        small {
+            display: block;
+            margin: 8px 0;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+        .acciones-producto a {
+            margin: 0 5px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #3498db;
+            color: #fff;
+        }
+
+        .acciones-producto a:hover {
+            background: #2980b9;
+        }
+
+        .acciones-producto .eliminar {
+            background: #e74c3c;
+        }
+
+        .acciones-producto .eliminar:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 Administrar Menú</h1>
+
+    <div class="acciones">
+        <a href="{% url 'crear_categoria' %}">➕ Crear Categoría</a>
+        <a href="{% url 'crear_producto' %}">➕ Crear Producto</a>
+        <a href="{% url 'dashboard' %}">📊 Dashboard</a>
+    </div>
+    <hr>
+
+    {% for categoria in categorias %}
+        <h2>{{ categoria.nombre }}</h2>
+        <ul>
+            {% for producto in categoria.productos.all %}
+                <li>
+                    {% if producto.imagen %}
+                        <img src="{{ producto.imagen.url }}" width="150">
+                    {% endif %}
+                    <div class="nombre">{{ producto.nombre }}</div>
+                    <div class="precio">${{ producto.precio }}</div>
+                    <small>{{ producto.descripcion }}</small>
+                    <div class="acciones-producto">
+                        <a href="{% url 'editar_producto' producto.id %}">✏️ Editar</a>
+                        <a href="{% url 'eliminar_producto' producto.id %}" class="eliminar">🗑 Eliminar</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% empty %}
+        <p>No hay categorías creadas.</p>
+    {% endfor %}
+</body>
+</html>
+ 
