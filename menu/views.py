@@ -3,13 +3,13 @@ from .models import Categoria, Producto, Pedido, PedidoItem
 
 def menu_view(request):
     categorias = Categoria.objects.prefetch_related("productos").all()
-    pedido = Pedido.objects.filter(entregado=False, confirmado=False).first()
-    if pedido:
-        pedido.calcular_total()
+    pedido = Pedido.objects.filter(confirmado=False).first()  # o como lo manejes
+    mesas = Mesa.objects.all()  # 👈 importante
 
     return render(request, "menu/menu.html", {
         "categorias": categorias,
         "pedido": pedido,
+        "mesas": mesas,  # 👈 aquí se envía
     })
 
 def agregar_al_pedido(request, producto_id):
@@ -42,14 +42,26 @@ def atender_pedido(request, pedido_id):
 
 def confirmar_pedido(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id, confirmado=False)
+    if request.method == "POST":
+        mesa_id = request.POST.get("mesa")
+        if mesa_id:
+            from .models import Mesa
+            mesa = get_object_or_404(Mesa, id=mesa_id)
+            pedido.mesa = mesa
+            mesa.ocupada = True  # marcar como ocupada
+            mesa.save()
+
     pedido.calcular_total()
     pedido.confirmado = True
     pedido.save()
     return redirect("menu")
 
-
 def pedidos_cocina(request):
-    pedidos = Pedido.objects.filter(confirmado=True, entregado=False).prefetch_related("items__producto")
+    pedidos = (
+        Pedido.objects.filter(confirmado=True, entregado=False)
+        .select_related("mesa")  # 👈 esto carga la mesa junto con el pedido
+        .prefetch_related("items__producto")
+    )
     return render(request, "menu/cocina.html", {"pedidos": pedidos})
 
 
@@ -62,7 +74,10 @@ def surtir_pedido(request, pedido_id):
     pedido.entregado = True
     pedido.save()
 
-    
+    # ✅ Liberar la mesa
+    if pedido.mesa:
+        pedido.mesa.ocupada = False
+        pedido.mesa.save()
 
     # Guardar en ventas diarias
     fecha_hoy = now().date()
@@ -195,3 +210,39 @@ def eliminar_producto(request, producto_id):
         return redirect("crear_menu")
 
     return render(request, "menu/eliminar_producto.html", {"producto": producto})
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import MesaForm
+from .models import Mesa
+
+def crear_mesa(request):
+    if request.method == "POST":
+        form = MesaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Mesa creada correctamente ✅")
+            return redirect("listar_mesas")  # 👈 redirige al listado de mesas
+    else:
+        form = MesaForm()
+
+    return render(request, "menu/crear_mesa.html", {"form": form})
+
+def listar_mesas(request):
+    mesas = Mesa.objects.all()
+    return render(request, "menu/listar_mesas.html", {"mesas": mesas})
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Mesa
+
+def borrar_mesa(request, mesa_id):
+    mesa = get_object_or_404(Mesa, id=mesa_id)
+    if request.method == "POST":  # Confirmación antes de borrar
+        mesa.delete()
+        return redirect("listar_mesas")  # Ajusta al nombre de tu URL de lista de mesas
+    return render(request, "menu/confirmar_borrar.html", {"mesa": mesa})

@@ -55,6 +55,8 @@
     <h1>🍽 Restaurante XYZ</h1>
     <p><strong>Ticket:</strong> #{{ pedido.id }}</p>
     <p><strong>Fecha:</strong> {{ pedido.creado_en|date:"d/m/Y H:i" }}</p>
+    <p><strong>Mesa:</strong> {{ pedido.mesa.nombre }}</p>
+
     <hr>
     <ul>
         {% for item in pedido.items.all %}

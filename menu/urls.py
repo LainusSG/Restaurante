@@ -30,4 +30,10 @@ urlpatterns = [
     path("menu/crear/", views.crear_menu, name="crear_menu"),
     path("menu/crear/categoria/", views.crear_categoria, name="crear_categoria"),
     path("menu/crear/producto/", views.crear_producto, name="crear_producto"),
+
+
+
+    path("mesas/", views.listar_mesas, name="listar_mesas"),
+    path("mesas/crear/", views.crear_mesa, name="crear_mesa"),
+    path("mesas/<int:mesa_id>/borrar/", views.borrar_mesa, name="borrar_mesa"),
 ]

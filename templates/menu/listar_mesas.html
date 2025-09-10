@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e67e22;
+            margin-bottom: 20px;
+        }
+
+        /* Botón de acción */
+        .acciones {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .acciones a {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 6px;
+            background: #27ae60;
+            color: #fff;
+            font-size: 14px;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .acciones a:hover {
+            background: #2ecc71;
+        }
+
+        /* Grid de mesas */
+        ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        li {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+            background: #2a2a2a;
+        }
+
+        .mesa-nombre {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #f1c40f;
+        }
+
+        .estado {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .ocupada {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .libre {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        /* Botón eliminar */
+        .btn-eliminar {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #c0392b;
+            color: white;
+            font-size: 13px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-eliminar:hover {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mesas Registradas</h1>
+
+    <div class="acciones">
+        <a href="{% url 'crear_mesa' %}">➕ Crear nueva mesa</a>
+    </div>
+
+    <ul>
+        {% for mesa in mesas %}
+            <li>
+                <div class="mesa-nombre">{{ mesa.nombre }}</div>
+                {% if mesa.ocupada %}
+                    <span class="estado ocupada">Ocupada</span>
+                {% else %}
+                    <span class="estado libre">Libre</span>
+                {% endif %}
+                <br>
+                <a href="{% url 'borrar_mesa' mesa.id %}" class="btn-eliminar" onclick="return confirm('¿Seguro que quieres eliminar la mesa {{ mesa.nombre }}?')">
+                    🗑 Eliminar
+                </a>
+            </li>
+        {% empty %}
+            <li>No hay mesas registradas</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

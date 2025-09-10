@@ -4,17 +4,39 @@
     <meta charset="UTF-8">
     <title>Menú del Restaurante</title>
     <style>
+        /* General */
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: #121212;
+            background: linear-gradient(135deg, #1b1b1b, #121212);
             margin: 0;
             padding: 20px;
             color: #f5f5f5;
+            line-height: 1.6;
         }
 
         h1, h2, h3 {
             font-weight: 600;
-            color: #e74c3c; /* Rojo vino */
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.4rem;
+            color: #f39c12;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: #3498db;
+            border-left: 4px solid #3498db;
+            padding-left: 8px;
         }
 
         /* Layout general */
@@ -22,60 +44,73 @@
             display: flex;
             gap: 40px;
             align-items: flex-start;
+            max-width: 1300px;
+            margin: auto;
         }
 
-        /* Sección menú */
+        /* Menú */
         .menu {
             flex: 2;
         }
 
         .categoria {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .productos {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
         }
 
         .producto {
             background: #1e1e1e;
             padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             text-align: center;
-            transition: transform 0.2s, background 0.2s;
+            transition: transform 0.2s ease, background 0.2s ease;
         }
 
         .producto:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
             background: #2a2a2a;
+        }
+
+        .producto img {
+            border-radius: 10px;
+            max-width: 100%;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 10px;
         }
 
         .producto h4 {
             margin: 10px 0 5px;
+            font-size: 1.1rem;
             color: #f1f1f1;
         }
 
         .producto p {
             margin: 5px 0;
-            font-size: 14px;
+            font-size: 15px;
             color: #bbb;
         }
 
         .producto a {
             display: inline-block;
             margin-top: 10px;
-            padding: 6px 12px;
+            padding: 8px 14px;
             background: #e74c3c;
             color: #fff;
-            border-radius: 6px;
+            border-radius: 8px;
             text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
         }
 
         .producto a:hover {
-            background: #ff5c5c;
+            background: #ff6b6b;
         }
 
         /* Pedido */
@@ -83,27 +118,30 @@
             flex: 1;
             background: #1e1e1e;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
             position: sticky;
             top: 20px;
         }
 
         .pedido h2 {
             color: #27ae60;
+            margin-bottom: 15px;
         }
 
         .pedido ul {
             list-style: none;
             padding: 0;
+            margin: 0 0 15px 0;
         }
 
         .pedido li {
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #333;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 15px;
         }
 
         .pedido li span {
@@ -120,16 +158,33 @@
             text-decoration: underline;
         }
 
+        .pedido p strong {
+            font-size: 1.2rem;
+            color: #f39c12;
+        }
+
+        .pedido select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            margin: 10px 0;
+            background: #2c2c2c;
+            color: #fff;
+        }
+
         .pedido button {
             margin-top: 15px;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #27ae60;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
         }
 
         .pedido button:hover {
@@ -151,7 +206,7 @@
                         {% for producto in categoria.productos.all %}
                             <div class="producto">
                                 {% if producto.imagen %}
-                                    <img src="{{ producto.imagen.url }}" width="150" style="border-radius: 8px;">
+                                    <img src="{{ producto.imagen.url }}">
                                 {% endif %}
                                 <h4>{{ producto.nombre }}</h4>
                                 <p>${{ producto.precio }}</p>
@@ -181,6 +236,19 @@
                 <p><strong>Total: ${{ pedido.total }}</strong></p>
                 <form method="post" action="{% url 'confirmar_pedido' pedido.id %}">
                     {% csrf_token %}
+                    {% if not pedido.mesa %}
+                        <label for="mesa">🪑 Selecciona tu mesa:</label>
+                        <select name="mesa" id="mesa" required>
+                            <option value="">-- Elige una mesa --</option>
+                            {% for mesa in mesas %}
+                                {% if not mesa.ocupada %}
+                                    <option value="{{ mesa.id }}">{{ mesa.nombre }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <p><strong>🪑 Mesa asignada:</strong> {{ pedido.mesa.nombre }}</p>
+                    {% endif %}
                     <button type="submit">✅ Confirmar Pedido</button>
                 </form>
             {% else %}

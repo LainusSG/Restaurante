@@ -55,12 +55,23 @@ class Producto(models.Model):
     def __str__(self):
         return self.nombre
 
+
+class Mesa(models.Model):
+    nombre = models.CharField(max_length=50, unique=True)
+    ocupada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.nombre
+
 class Pedido(models.Model):
+    mesa = models.ForeignKey(
+        Mesa, on_delete=models.SET_NULL, null=True, blank=True, related_name="pedidos"
+    )
     creado_en = models.DateTimeField(auto_now_add=True)
     entregado = models.BooleanField(default=False)
-    confirmado = models.BooleanField(default=False)  # 🔹 Nuevo campo
+    confirmado = models.BooleanField(default=False)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    atendido = models.BooleanField(default=False)  # 👈 Nuevo campo
+    atendido = models.BooleanField(default=False)
 
     def calcular_total(self):
         total = self.items.aggregate(
@@ -71,8 +82,7 @@ class Pedido(models.Model):
         return total
 
     def __str__(self):
-        return f"Pedido #{self.id} - Total: {self.total}"
-
+        return f"Pedido #{self.id} - {self.mesa.nombre if self.mesa else 'Sin mesa'}"
 
 class PedidoItem(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="items")
@@ -91,3 +101,6 @@ class VentaDiaria(models.Model):
 
     def __str__(self):
         return f"Ventas {self.fecha}: {self.total}"
+    
+
+

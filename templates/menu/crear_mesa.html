@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Mesa</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            width: 350px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: none;
+        }
+        input {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        button {
+            background: #27ae60;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>➕ Crear Mesa</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Guardar Mesa</button>
+        </form>
+    </div>
+</body>
+</html>
