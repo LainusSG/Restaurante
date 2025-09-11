@@ -57,26 +57,23 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:20000",
-    "http://127.0.0.1:20000",
-    "http://213.199.58.201:20000",
-    "https://barberia_grandfather.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://213.199.58.201:3000",
 ]
 
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:20000",
-    "http://127.0.0.1:20000",
-    "http://213.199.58.201:20000",
-    "https://barberia_grandfather.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://213.199.58.201:3000",
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    "http://localhost:20000",
-    "http://127.0.0.1:20000",
-    "http://213.199.58.201:20000",
-    "https://barberia_grandfather.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://213.199.58.201:3000",
 ]
 
 
