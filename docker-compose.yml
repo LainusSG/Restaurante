@@ -20,7 +20,7 @@ services:
       - static_volume:/root/restaurante/staticfiles
       - media_volume:/root/restaurante/mediafiles
     ports:
-      - "1000:80"   # Cambié a 10000
+      - "3000:80"   # Cambié a 10000
     depends_on:
       - web
 
