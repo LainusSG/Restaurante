@@ -3,13 +3,16 @@ from .models import Categoria, Producto, Pedido, PedidoItem
 
 def menu_view(request):
     categorias = Categoria.objects.prefetch_related("productos").all()
-    pedido = Pedido.objects.filter(confirmado=False).first()  # o como lo manejes
-    mesas = Mesa.objects.all()  # 👈 importante
+    pedido = Pedido.objects.filter(confirmado=False, entregado=False).first()
+    mesas = Mesa.objects.all()
+
+    if pedido:
+        pedido.calcular_total()  # 👈 asegura que el total esté actualizado
 
     return render(request, "menu/menu.html", {
         "categorias": categorias,
         "pedido": pedido,
-        "mesas": mesas,  # 👈 aquí se envía
+        "mesas": mesas,
     })
 
 def agregar_al_pedido(request, producto_id):
