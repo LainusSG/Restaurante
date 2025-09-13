@@ -37,4 +37,7 @@ urlpatterns = [
     path("mesas/", views.listar_mesas, name="listar_mesas"),
     path("mesas/crear/", views.crear_mesa, name="crear_mesa"),
     path("mesas/<int:mesa_id>/borrar/", views.borrar_mesa, name="borrar_mesa"),
+
+
+    path("cocina/json/", views.pedidos_cocina_json, name="pedidos_cocina_json"),  # ✅
 ]

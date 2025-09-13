@@ -47,7 +47,6 @@
             margin: 10px 0;
         }
 
-        /* Estados */
         .estado-preparacion {
             color: #f39c12;
             font-weight: bold;
@@ -58,7 +57,6 @@
             font-weight: bold;
         }
 
-        /* Botones */
         .btn {
             display: inline-block;
             padding: 8px 14px;
@@ -92,39 +90,24 @@
 <body>
     <h1>👨‍🍳 Pedidos en cocina</h1>
 
-    {% for pedido in pedidos %}
-        <div class="pedido">
-            <h3>Pedido #{{ pedido.id }}</h3>
+    <!-- Aquí se cargan los pedidos -->
+    <div id="pedidos-lista">
+        {% include "menu/pedidos_list.html" %}
+    </div>
 
-            {% if pedido.mesa %}
-                <p>🪑 Mesa: {{ pedido.mesa.nombre }}</p>
-            {% else %}
-                <p>🪑 Mesa: No asignada</p>
-            {% endif %}
+    <!-- Script para actualizar la lista -->
+    <script>
+        function actualizarPedidos() {
+            fetch("{% url 'pedidos_cocina_json' %}")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("pedidos-lista").innerHTML = data.html;
+                })
+                .catch(error => console.error("Error al actualizar pedidos:", error));
+        }
 
-            <ul>
-                {% for item in pedido.items.all %}
-                    <li>{{ item.producto.nombre }} (x{{ item.cantidad }}) <br> <small style="color:#aaa;">📝 {{ item.observaciones }}</small></li>
-                    
-                {% endfor %}
-            </ul>
-            <p class="total">Total: ${{ pedido.total }}</p>
-
-            {% if not pedido.atendido %}
-                <a href="{% url 'atender_pedido' pedido.id %}" class="btn btn-atender">
-                    ✅ Marcar como Atendido
-                </a>
-            {% elif pedido.atendido and not pedido.entregado %}
-                <p class="estado-preparacion">⚡ En preparación...</p>
-                <a href="{% url 'surtir_pedido' pedido.id %}" class="btn btn-surtir">
-                    🍽 Marcar como Surtido
-                </a>
-            {% elif pedido.entregado %}
-                <p class="estado-entregado">✔ Pedido entregado</p>
-            {% endif %}
-        </div>
-    {% empty %}
-        <p class="no-pedidos">No hay pedidos pendientes</p>
-    {% endfor %}
+        actualizarPedidos(); // primera carga
+        setInterval(actualizarPedidos, 3000); // cada 3s
+    </script>
 </body>
 </html>

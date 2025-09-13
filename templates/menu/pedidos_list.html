@@ -1,0 +1,37 @@
+{% for pedido in pedidos %}
+    <div class="pedido">
+        <h3>Pedido #{{ pedido.id }}</h3>
+
+        {% if pedido.mesa %}
+            <p>🪑 Mesa: {{ pedido.mesa.nombre }}</p>
+        {% else %}
+            <p>🪑 Mesa: No asignada</p>
+        {% endif %}
+
+        <ul>
+            {% for item in pedido.items.all %}
+                <li>
+                    {{ item.producto.nombre }} (x{{ item.cantidad }}) 
+                    <br> <small style="color:#aaa;">📝 {{ item.observaciones }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <p class="total">Total: ${{ pedido.total }}</p>
+
+        {% if not pedido.atendido %}
+            <a href="{% url 'atender_pedido' pedido.id %}" class="btn btn-atender">
+                ✅ Marcar como Atendido
+            </a>
+        {% elif pedido.atendido and not pedido.entregado %}
+            <p class="estado-preparacion">⚡ En preparación...</p>
+            <a href="{% url 'surtir_pedido' pedido.id %}" class="btn btn-surtir">
+                🍽 Marcar como Surtido
+            </a>
+        {% elif pedido.entregado %}
+            <p class="estado-entregado">✔ Pedido entregado</p>
+        {% endif %}
+    </div>
+{% empty %}
+    <p class="no-pedidos">No hay pedidos pendientes</p>
+{% endfor %}
