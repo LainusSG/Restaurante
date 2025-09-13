@@ -277,3 +277,12 @@ def borrar_mesa(request, mesa_id):
         mesa.delete()
         return redirect("listar_mesas")  # Ajusta al nombre de tu URL de lista de mesas
     return render(request, "menu/confirmar_borrar.html", {"mesa": mesa})
+
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from .models import Pedido
+
+def pedidos_cocina_json(request):
+    pedidos = Pedido.objects.filter(confirmado=True, entregado=False).prefetch_related("items__producto", "mesa")
+    html = render_to_string("menu/pedidos_list.html", {"pedidos": pedidos})
+    return JsonResponse({"html": html})
