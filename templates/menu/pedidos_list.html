@@ -4,33 +4,30 @@
 
         {% if pedido.mesa %}
             <p>🪑 Mesa: {{ pedido.mesa.nombre }}</p>
-        {% else %}
-            <p>🪑 Mesa: No asignada</p>
         {% endif %}
 
         <ul>
             {% for item in pedido.items.all %}
                 <li>
-                    {{ item.producto.nombre }} (x{{ item.cantidad }}) 
-                    <br> <small style="color:#aaa;">📝 {{ item.observaciones }}</small>
+                    {{ item.producto.nombre }} (x{{ item.cantidad }}) <br>📝 {{ item.observaciones }}
+
+                    {% if not item.atendido %}
+                        <a href="{% url 'atender_item' item.id %}" class="btn btn-atender">
+                            ✅ Marcar como Atendido
+                        </a>
+                    {% elif item.atendido and not item.surtido %}
+                        <span class="estado-preparacion">⚡ En preparación...</span>
+                        <a href="{% url 'surtir_item' item.id %}" class="btn btn-surtir">
+                            🍽 Marcar como Surtido
+                        </a>
+                    {% elif item.surtido %}
+                        <span class="estado-entregado">✔ Entregado</span>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
 
         <p class="total">Total: ${{ pedido.total }}</p>
-
-        {% if not pedido.atendido %}
-            <a href="{% url 'atender_pedido' pedido.id %}" class="btn btn-atender">
-                ✅ Marcar como Atendido
-            </a>
-        {% elif pedido.atendido and not pedido.entregado %}
-            <p class="estado-preparacion">⚡ En preparación...</p>
-            <a href="{% url 'surtir_pedido' pedido.id %}" class="btn btn-surtir">
-                🍽 Marcar como Surtido
-            </a>
-        {% elif pedido.entregado %}
-            <p class="estado-entregado">✔ Pedido entregado</p>
-        {% endif %}
     </div>
 {% empty %}
     <p class="no-pedidos">No hay pedidos pendientes</p>

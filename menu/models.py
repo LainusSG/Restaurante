@@ -50,7 +50,10 @@ class PedidoItem(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="items")
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
-    observaciones = models.CharField(max_length=255, default="con todo")  # 👈 nueva columna
+    observaciones = models.CharField(max_length=255, default="con todo")
+    confirmado = models.BooleanField(default=False)  # ya lo tenemos
+    atendido = models.BooleanField(default=False)   # nuevo
+    surtido = models.BooleanField(default=False)    # nuevo
 
     def subtotal(self):
         return self.cantidad * self.producto.precio

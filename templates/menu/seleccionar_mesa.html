@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Seleccionar Mesa</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1b1b1b, #121212);
+            margin: 0;
+            padding: 20px;
+            color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.4rem;
+            color: #f39c12;
+            margin-bottom: 30px;
+        }
+        .mesas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: auto;
+        }
+        .mesa {
+            text-align: center;
+        }
+        .mesa a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 140px;
+            height: 140px;
+            margin: auto;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        .mesa a:hover {
+            transform: scale(1.08);
+        }
+        svg {
+            width: 140px;
+            height: 140px;
+        }
+        .mesa-label {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #ddd;
+        }
+        .ocupada circle {
+            fill: #e74c3c;
+        }
+        .libre circle {
+            fill: #2ecc71;
+        }
+        .mesa-text {
+            font-size: 1.2rem;
+            fill: white;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1>🪑 Selecciona una Mesa</h1>
+    <div class="mesas-container">
+        {% for mesa in mesas %}
+            <div class="mesa">
+                <a href="{% url 'menu' mesa.id %}" class="{% if mesa.ocupada %}ocupada{% else %}libre{% endif %}">
+                    <svg viewBox="0 0 100 100">
+                        <!-- círculo de la mesa -->
+                        <circle cx="50" cy="50" r="45" />
+                        <!-- texto en el centro -->
+                        <text x="50" y="55" class="mesa-text">{{ mesa.nombre }}</text>
+                    </svg>
+                </a>
+                <div class="mesa-label">
+                    {% if mesa.ocupada %}
+                        🔴 Ocupada
+                    {% else %}
+                        🟢 Disponible
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p style="text-align:center; color:#aaa;">No hay mesas registradas.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

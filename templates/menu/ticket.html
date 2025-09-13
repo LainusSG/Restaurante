@@ -81,7 +81,7 @@ function imprimirYVolver() {
     window.print();
     // Espera un poco para que dé tiempo a la impresión antes de redirigir
     setTimeout(() => {
-        window.location.href = "{% url 'cocina' %}";
+        window.location.href = "{% url 'seleccionar_mesa' %}";
     }, 500);
 }
 </script>
