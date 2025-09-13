@@ -30,7 +30,8 @@ urlpatterns = [
     path("menu/crear/", views.crear_menu, name="crear_menu"),
     path("menu/crear/categoria/", views.crear_categoria, name="crear_categoria"),
     path("menu/crear/producto/", views.crear_producto, name="crear_producto"),
-
+    path('categoria/editar/<int:categoria_id>/', views.editar_categoria, name='editar_categoria'),
+    path('categoria/eliminar/<int:categoria_id>/', views.eliminar_categoria, name='eliminar_categoria'),
 
 
     path("mesas/", views.listar_mesas, name="listar_mesas"),

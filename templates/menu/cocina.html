@@ -104,7 +104,8 @@
 
             <ul>
                 {% for item in pedido.items.all %}
-                    <li>{{ item.producto.nombre }} (x{{ item.cantidad }})</li>
+                    <li>{{ item.producto.nombre }} (x{{ item.cantidad }}) <br> <small style="color:#aaa;">📝 {{ item.observaciones }}</small></li>
+                    
                 {% endfor %}
             </ul>
             <p class="total">Total: ${{ pedido.total }}</p>

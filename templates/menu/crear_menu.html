@@ -23,6 +23,27 @@
             color: #f1c40f;
             border-bottom: 2px solid #333;
             padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h2 .acciones-categoria a {
+            margin-left: 10px;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #fff;
+            background: #3498db;
+        }
+
+        h2 .acciones-categoria a.eliminar {
+            background: #e74c3c;
+        }
+
+        h2 .acciones-categoria a:hover {
+            opacity: 0.85;
         }
 
         a {
@@ -131,7 +152,13 @@
     <hr>
 
     {% for categoria in categorias %}
-        <h2>{{ categoria.nombre }}</h2>
+        <h2>
+            {{ categoria.nombre }}
+            <span class="acciones-categoria">
+                <a href="{% url 'editar_categoria' categoria.id %}">✏️ Editar</a>
+                <a href="{% url 'eliminar_categoria' categoria.id %}" class="eliminar">🗑 Eliminar</a>
+            </span>
+        </h2>
         <ul>
             {% for producto in categoria.productos.all %}
                 <li>
@@ -153,4 +180,3 @@
     {% endfor %}
 </body>
 </html>
- 

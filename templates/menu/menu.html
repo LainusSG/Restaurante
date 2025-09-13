@@ -97,20 +97,43 @@
             color: #bbb;
         }
 
-        .producto a {
-            display: inline-block;
+        .producto form {
             margin-top: 10px;
+        }
+
+        .producto button {
+            display: inline-block;
+            margin-top: 8px;
             padding: 8px 14px;
             background: #e74c3c;
             color: #fff;
             border-radius: 8px;
-            text-decoration: none;
+            border: none;
             font-weight: bold;
+            cursor: pointer;
             transition: background 0.3s;
         }
 
-        .producto a:hover {
+        .producto button:hover {
             background: #ff6b6b;
+        }
+
+        .producto textarea {
+            width: 100%;
+            border-radius: 8px;
+            padding: 6px;
+            margin-top: 6px;
+            background: #2c2c2c;
+            color: #fff;
+            border: none;
+            resize: none;
+        }
+
+        .producto label {
+            font-size: 14px;
+            color: #ccc;
+            display: block;
+            margin-top: 6px;
         }
 
         /* Pedido */
@@ -210,7 +233,17 @@
                                 {% endif %}
                                 <h4>{{ producto.nombre }}</h4>
                                 <p>${{ producto.precio }}</p>
-                                <a href="{% url 'agregar_al_pedido' producto.id %}">➕ Agregar</a>
+
+                                <!-- Formulario con observaciones -->
+                                <form method="post" action="{% url 'agregar_al_pedido' producto.id %}">
+                                    {% csrf_token %}
+                                    <label>
+                                        <input type="checkbox" class="chk_obs">
+                                        Agregar observaciones
+                                    </label>
+                                    <textarea name="observaciones" rows="2" cols="20" class="txt_obs" disabled></textarea>
+                                    <button type="submit">➕ Agregar</button>
+                                </form>
                             </div>
                         {% empty %}
                             <p>No hay productos en esta categoría</p>
@@ -227,12 +260,18 @@
                 <ul>
                     {% for item in pedido.items.all %}
                         <li>
-                            <span>{{ item.producto.nombre }} (x{{ item.cantidad }})</span>
-                            <span>${{ item.subtotal }}</span>
-                            <a href="{% url 'eliminar_item_pedido' item.id %}">❌</a>
+                            <div>
+                                <span>{{ item.producto.nombre }} (x{{ item.cantidad }})</span><br>
+                                <small style="color:#aaa;">📝 {{ item.observaciones }}</small>
+                            </div>
+                            <div>
+                                <span>${{ item.subtotal }}</span>
+                                <a href="{% url 'eliminar_item_pedido' item.id %}">❌</a>
+                            </div>
                         </li>
                     {% endfor %}
                 </ul>
+
                 <p><strong>Total: ${{ pedido.total }}</strong></p>
                 <form method="post" action="{% url 'confirmar_pedido' pedido.id %}">
                     {% csrf_token %}
@@ -256,5 +295,16 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Script para habilitar textarea solo si se marca la casilla -->
+    <script>
+        document.querySelectorAll(".chk_obs").forEach((chk, index) => {
+            const txt = document.querySelectorAll(".txt_obs")[index];
+            chk.addEventListener("change", () => {
+                txt.disabled = !chk.checked;
+                if (!chk.checked) txt.value = "";
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🗑 Eliminar Categoría</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: inline-block;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        .confirmar {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .confirmar:hover {
+            background: #c0392b;
+        }
+
+        .cancelar {
+            background: #95a5a6;
+            color: #121212;
+        }
+
+        .cancelar:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗑 Eliminar Categoría</h1>
+    <p>¿Estás seguro de que deseas eliminar la categoría "<strong>{{ categoria.nombre }}</strong>"? Esto también eliminará todos los productos asociados.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn confirmar">✅ Sí, eliminar</button>
+        <a href="{% url 'crear_menu' %}" class="btn cancelar">❌ Cancelar</a>
+    </form>
+</body>
+</html>

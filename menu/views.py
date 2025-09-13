@@ -19,12 +19,20 @@ def agregar_al_pedido(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     pedido, creado = Pedido.objects.get_or_create(entregado=False, confirmado=False)
 
+    # 🔑 Observaciones recibidas del formulario
+    observaciones = request.POST.get("observaciones", "").strip()
+    if not observaciones:
+        observaciones = "con todo"
+
+    # Buscar si ya existe el mismo producto con las mismas observaciones
     item, creado_item = PedidoItem.objects.get_or_create(
-        pedido=pedido, producto=producto,
-        defaults={"cantidad": 1}  # si no existía, arranca en 1
+        pedido=pedido,
+        producto=producto,
+        observaciones=observaciones,   # 👈 diferenciamos por observaciones
+        defaults={"cantidad": 1}
     )
 
-    if not creado_item:  # si ya existía, entonces sí sumamos
+    if not creado_item:  # si ya existía ese mismo producto con mismas observaciones
         item.cantidad += 1
         item.save()
 
@@ -174,6 +182,26 @@ def crear_menu(request):
     categorias = Categoria.objects.all().prefetch_related("productos")
     return render(request, "menu/crear_menu.html", {"categorias": categorias})
 
+
+@login_required
+def editar_categoria(request, categoria_id):
+    categoria = get_object_or_404(Categoria, id=categoria_id)
+    if request.method == "POST":
+        form = CategoriaForm(request.POST, instance=categoria)
+        if form.is_valid():
+            form.save()
+            return redirect("crear_menu")
+    else:
+        form = CategoriaForm(instance=categoria)
+    return render(request, "menu/editar_categoria.html", {"form": form, "categoria": categoria})
+
+@login_required
+def eliminar_categoria(request, categoria_id):
+    categoria = get_object_or_404(Categoria, id=categoria_id)
+    if request.method == "POST":
+        categoria.delete()
+        return redirect("crear_menu")
+    return render(request, "menu/eliminar_categoria.html", {"categoria": categoria})
 
 
 

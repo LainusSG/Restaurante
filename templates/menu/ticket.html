@@ -61,7 +61,7 @@
     <ul>
         {% for item in pedido.items.all %}
             <li class="linea">
-                <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                <span>{{ item.cantidad }}x {{ item.producto.nombre }} <br> <small style="color:#aaa;">{{ item.observaciones }}</small></span>
                 <span>${{ item.subtotal }}</span>
             </li>
         {% endfor %}
