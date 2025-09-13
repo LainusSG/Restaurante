@@ -17,7 +17,7 @@ urlpatterns = [
 
     path("cocina/", views.pedidos_cocina, name="cocina"),
     path("surtir/<int:pedido_id>/", views.surtir_pedido, name="surtir_pedido"),
-
+    path("cambiar-item/<int:item_id>/<str:nuevo_estado>/", views.cambiar_estado_item, name="cambiar_estado_item"),
 
 
 

@@ -8,13 +8,26 @@
             <p>🪑 Mesa: No asignada</p>
         {% endif %}
 
-        <ul>
+       <ul>
             {% for item in pedido.items.all %}
                 <li>
-                    {{ item.producto.nombre }} (x{{ item.cantidad }}) <br>📝 {{ item.observaciones }} 
+                    {{ item.producto.nombre }} (x{{ item.cantidad }}) <br>
+                    📝 {{ item.observaciones }} <br>
+
+                    Estado:
+                    {% if item.estado == "pendiente" %}
+                        <span style="color:orange;">Pendiente</span>
+                        <a href="{% url 'cambiar_estado_item' item.id 'preparacion' %}" class="btn btn-atender">⚡ Preparar</a>
+                    {% elif item.estado == "preparacion" %}
+                        <span style="color:yellow;">En preparación</span>
+                        <a href="{% url 'cambiar_estado_item' item.id 'entregado' %}" class="btn btn-surtir">🍽 Entregar</a>
+                    {% elif item.estado == "entregado" %}
+                        <span style="color:green;">✔ Entregado</span>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
+
 
         <p class="total">Total: ${{ pedido.total }}</p>
 

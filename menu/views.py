@@ -76,6 +76,21 @@ def pedidos_cocina(request):
     return render(request, "menu/cocina.html", {"pedidos": pedidos})
 
 
+
+
+
+def cambiar_estado_item(request, item_id, nuevo_estado):
+    item = get_object_or_404(PedidoItem, id=item_id)
+
+    if nuevo_estado in dict(PedidoItem.ESTADOS):  
+        item.estado = nuevo_estado
+        item.save()
+
+    return redirect("cocina")
+
+
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from .models import Pedido, VentaDiaria
