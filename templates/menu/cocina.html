@@ -4,43 +4,127 @@
     <meta charset="UTF-8">
     <title>Pedidos en cocina</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #f5f5f5; margin: 0; padding: 20px; }
-        h1 { color: #e74c3c; margin-bottom: 20px; }
-        .pedido { background: #1e1e1e; border: 1px solid #333; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
-        .pedido h3 { margin-top: 0; color: #f39c12; }
-        .pedido ul { list-style: none; padding: 0; margin: 0 0 10px; }
-        .pedido li { padding: 6px 0; border-bottom: 1px solid #333; display:flex; justify-content:space-between; align-items:center; }
-        .total { font-weight: bold; margin: 10px 0; }
-        .estado-preparacion { color: #f39c12; font-weight: bold; }
-        .estado-entregado { color: #2ecc71; font-weight: bold; }
-        .btn { display: inline-block; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-weight: 500; transition: background 0.2s; }
-        .btn-atender { background: #27ae60; color: white; }
-        .btn-atender:hover { background: #2ecc71; }
-        .btn-surtir { background: #3498db; color: white; }
-        .btn-surtir:hover { background: #5dade2; }
-        .no-pedidos { color: #aaa; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .pedido {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .pedido h3 {
+            margin-top: 0;
+            color: #f39c12;
+        }
+
+        .pedido ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 10px;
+        }
+
+        .pedido li {
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .total {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* Estados */
+        .estado-preparacion {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .estado-entregado {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        /* Botones */
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-atender {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-atender:hover {
+            background: #2ecc71;
+        }
+
+        .btn-surtir {
+            background: #3498db;
+            color: white;
+        }
+        .btn-surtir:hover {
+            background: #5dade2;
+        }
+
+        .no-pedidos {
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
-<h1>👨‍🍳 Pedidos en cocina</h1>
+    <h1>👨‍🍳 Pedidos en cocina</h1>
 
-<div id="pedidos-container">
-    {% include "menu/pedidos_list.html" %}
-</div>
+    {% for pedido in pedidos %}
+        <div class="pedido">
+            <h3>Pedido #{{ pedido.id }}</h3>
 
-<script>
-function fetchPedidos() {
-    fetch("{% url 'pedidos_cocina_json' %}")
-    .then(response => response.json())
-    .then(data => {
-        const container = document.getElementById("pedidos-container");
-        container.innerHTML = data.html;
-    })
-    .catch(err => console.error("Error al actualizar pedidos:", err));
-}
+            {% if pedido.mesa %}
+                <p>🪑 Mesa: {{ pedido.mesa.nombre }}</p>
+            {% else %}
+                <p>🪑 Mesa: No asignada</p>
+            {% endif %}
 
-// Actualiza cada 5 segundos
-setInterval(fetchPedidos, 5000);
-</script>
+            <ul>
+                {% for item in pedido.items.all %}
+                    <li>{{ item.producto.nombre }} (x{{ item.cantidad }}) <br> <small style="color:#aaa;">📝 {{ item.observaciones }}</small></li>
+                    
+                {% endfor %}
+            </ul>
+            <p class="total">Total: ${{ pedido.total }}</p>
+
+            {% if not pedido.atendido %}
+                <a href="{% url 'atender_pedido' pedido.id %}" class="btn btn-atender">
+                    ✅ Marcar como Atendido
+                </a>
+            {% elif pedido.atendido and not pedido.entregado %}
+                <p class="estado-preparacion">⚡ En preparación...</p>
+                <a href="{% url 'surtir_pedido' pedido.id %}" class="btn btn-surtir">
+                    🍽 Marcar como Surtido
+                </a>
+            {% elif pedido.entregado %}
+                <p class="estado-entregado">✔ Pedido entregado</p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p class="no-pedidos">No hay pedidos pendientes</p>
+    {% endfor %}
 </body>
 </html>

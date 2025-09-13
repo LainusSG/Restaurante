@@ -13,11 +13,11 @@ urlpatterns = [
     path("pedido/confirmar/<int:pedido_id>/", views.confirmar_pedido, name="confirmar_pedido"),
     path("pedido/eliminar/<int:item_id>/", views.eliminar_item_pedido, name="eliminar_item_pedido"),
     path("pedido/<int:pedido_id>/atender/", views.atender_pedido, name="atender_pedido"),
-    path("cocina/json/", views.pedidos_cocina_json, name="pedidos_cocina_json"),  # ✅ nueva URL
+
 
     path("cocina/", views.pedidos_cocina, name="cocina"),
     path("surtir/<int:pedido_id>/", views.surtir_pedido, name="surtir_pedido"),
-    path("cambiar-item/<int:item_id>/<str:nuevo_estado>/", views.cambiar_estado_item, name="cambiar_estado_item"),
+
 
 
 

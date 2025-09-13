@@ -76,21 +76,6 @@ def pedidos_cocina(request):
     return render(request, "menu/cocina.html", {"pedidos": pedidos})
 
 
-
-
-
-def cambiar_estado_item(request, item_id, nuevo_estado):
-    item = get_object_or_404(PedidoItem, id=item_id)
-
-    if nuevo_estado in dict(PedidoItem.ESTADOS):  
-        item.estado = nuevo_estado
-        item.save()
-
-    return redirect("cocina")
-
-
-
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from .models import Pedido, VentaDiaria
@@ -292,12 +277,3 @@ def borrar_mesa(request, mesa_id):
         mesa.delete()
         return redirect("listar_mesas")  # Ajusta al nombre de tu URL de lista de mesas
     return render(request, "menu/confirmar_borrar.html", {"mesa": mesa})
-
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from .models import Pedido
-
-def pedidos_cocina_json(request):
-    pedidos = Pedido.objects.filter(confirmado=True, entregado=False).prefetch_related("items__producto", "mesa")
-    html = render_to_string("menu/pedidos_list.html", {"pedidos": pedidos})
-    return JsonResponse({"html": html})

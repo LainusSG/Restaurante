@@ -47,23 +47,16 @@ class Pedido(models.Model):
         return f"Pedido #{self.id} - {self.mesa.nombre if self.mesa else 'Sin mesa'}"
 
 class PedidoItem(models.Model):
-    ESTADOS = [
-        ("pendiente", "Pendiente"),
-        ("preparacion", "En preparación"),
-        ("entregado", "Entregado"),
-    ]
-
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="items")
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
-    observaciones = models.CharField(max_length=255, default="con todo")
-    estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente")  # 👈
+    observaciones = models.CharField(max_length=255, default="con todo")  # 👈 nueva columna
 
     def subtotal(self):
         return self.cantidad * self.producto.precio
 
     def __str__(self):
-        return f"{self.producto.nombre} x{self.cantidad} ({self.observaciones}) - {self.estado}"
+        return f"{self.producto.nombre} x{self.cantidad} ({self.observaciones})"
 
 class VentaDiaria(models.Model):
     fecha = models.DateField(default=now)
