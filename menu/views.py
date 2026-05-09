@@ -245,7 +245,7 @@ def dashboard_ventas(request):
 
     labels = [d["periodo_label"] for d in datos]
     valores = [float(d["total"]) for d in datos]
-    paginator = Paginator(datos, 10)
+    paginator = Paginator(datos, 15)
     page_obj = paginator.get_page(request.GET.get("page"))
 
     return render(request, "menu/dashboard.html", {
