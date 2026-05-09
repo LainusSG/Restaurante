@@ -1,1 +1,15 @@
 lib
+# Entornos virtuales
+venv/
+.venv/
+env/
+# Archivos compilados
+__pycache__/
+*.pyc
+
+# Base de datos local (¡Importante!)
+db.sqlite3
+
+# Archivos de medios y logs
+media/
+*.log
