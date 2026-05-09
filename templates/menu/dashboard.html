@@ -93,14 +93,27 @@
         }
 
         /* Tabla */
-        table {
+        .table-container {
             width: 80%;
             margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             background: #1e1e1e;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+
+        col.period-col {
+            width: 50%;
+        }
+
+        col.total-col {
+            width: 50%;
         }
 
         thead {
@@ -110,6 +123,7 @@
         th, td {
             padding: 12px 15px;
             text-align: center;
+            vertical-align: middle;
         }
 
         th {
@@ -126,6 +140,7 @@
 
         td {
             color: #ddd;
+            overflow-wrap: anywhere;
         }
 
         /* Paginador */
@@ -176,22 +191,28 @@
 
     <!-- Tabla -->
     <h2>Detalle de Ventas</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Periodo</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-         {% for d in datos %}
-            <tr>
-                <td>{{ d.periodo_label }}</td>
-                <td>${{ d.total }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <colgroup>
+                <col class="period-col">
+                <col class="total-col">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Periodo</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+             {% for d in datos %}
+                <tr>
+                    <td>{{ d.periodo_label }}</td>
+                    <td>${{ d.total }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Paginador -->
     <div class="pagination">
