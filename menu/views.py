@@ -222,12 +222,81 @@ def _ventas_por_semana_desde_enero(ventas):
     return [semanas[clave] for clave in sorted(semanas)]
 
 
+def _sumar_ventas(ventas):
+    return ventas.aggregate(total=Sum("total"))["total"] or 0
+
+
+def _consulta_total_ventas(request, ventas):
+    hoy = now().date()
+    tipo = request.GET.get("total_tipo", "dia")
+    valor = request.GET.get("total_valor", "")
+    consulta_activa = bool(valor)
+
+    if not consulta_activa:
+        total = _sumar_ventas(ventas.filter(fecha=hoy))
+        return {
+            "tipo": "dia",
+            "valor": hoy.isoformat(),
+            "label": f"Hoy, {_fecha_corta(hoy)}",
+            "total": total,
+            "datos": None,
+        }
+
+    try:
+        if tipo == "mes":
+            ano, mes = [int(parte) for parte in valor.split("-", 1)]
+            inicio = date(ano, mes, 1)
+            total = _sumar_ventas(ventas.filter(fecha__year=ano, fecha__month=mes))
+            return {
+                "tipo": "mes",
+                "valor": valor,
+                "label": _periodo_label(inicio, "mes"),
+                "total": total,
+                "datos": [{"periodo": inicio, "total": total}],
+            }
+
+        if tipo in ("año", "ano"):
+            ano = int(valor)
+            inicio = date(ano, 1, 1)
+            total = _sumar_ventas(ventas.filter(fecha__year=ano))
+            return {
+                "tipo": "año",
+                "valor": valor,
+                "label": _periodo_label(inicio, "año"),
+                "total": total,
+                "datos": [{"periodo": inicio, "total": total}],
+            }
+
+        dia = date.fromisoformat(valor)
+        total = _sumar_ventas(ventas.filter(fecha=dia))
+        return {
+            "tipo": "dia",
+            "valor": valor,
+            "label": _fecha_corta(dia),
+            "total": total,
+            "datos": [{"periodo": dia, "total": total}],
+        }
+    except (TypeError, ValueError):
+        total = _sumar_ventas(ventas.filter(fecha=hoy))
+        return {
+            "tipo": "dia",
+            "valor": hoy.isoformat(),
+            "label": f"Hoy, {_fecha_corta(hoy)}",
+            "total": total,
+            "datos": None,
+        }
+
+
 def dashboard_ventas(request):
     filtro = request.GET.get("filtro", "dia")
 
     ventas = VentaDiaria.objects.all().order_by("fecha")
+    consulta_total = _consulta_total_ventas(request, ventas)
 
-    if filtro == "dia":
+    if consulta_total["datos"] is not None:
+        filtro = consulta_total["tipo"]
+        datos = consulta_total["datos"]
+    elif filtro == "dia":
         datos = ventas.annotate(periodo=TruncDay("fecha")).values("periodo").annotate(total=Sum("total")).order_by("periodo")
     elif filtro == "semana":
         datos = _ventas_por_semana_desde_enero(ventas)
@@ -245,8 +314,7 @@ def dashboard_ventas(request):
 
     labels = [d["periodo_label"] for d in datos]
     valores = [float(d["total"]) for d in datos]
-    total_general = sum(valores)
-    total_general_label = f"${total_general:,.2f}"
+    total_general_label = f"${consulta_total['total']:,.2f}"
     paginator = Paginator(datos, 15)
     page_obj = paginator.get_page(request.GET.get("page"))
 
@@ -254,8 +322,8 @@ def dashboard_ventas(request):
         "filtro": filtro,
         "labels": json.dumps(labels),
         "valores": json.dumps(valores),
-        "total_general": total_general,
         "total_general_label": total_general_label,
+        "consulta_total": consulta_total,
         "datos": page_obj,
         "page_obj": page_obj,
     })

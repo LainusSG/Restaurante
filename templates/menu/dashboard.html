@@ -11,24 +11,17 @@
 {% include "components/page_hero.html" with compact=True eyebrow="Analitica" title="Historial de ventas" subtitle="Consulta el comportamiento de ventas por dia, semana, mes o año." %}
 
 <main class="page-shell">
-    <section class="dashboard-toolbar content-card">
-        <div>
-            <span class="eyebrow-light">Reporte</span>
-            <h2>Resumen de ventas</h2>
-        </div>
-        <form method="get" class="filter-form">
-            <select name="filtro" onchange="this.form.submit()">
-                <option value="dia" {% if filtro == "dia" %}selected{% endif %}>Por dia</option>
-                <option value="semana" {% if filtro == "semana" %}selected{% endif %}>Por semana</option>
-                <option value="mes" {% if filtro == "mes" %}selected{% endif %}>Por mes</option>
-                <option value="año" {% if filtro == "año" %}selected{% endif %}>Por año</option>
-            </select>
-        </form>
-    </section>
-
     <section class="dashboard-grid">
-        {% include "components/metric_card.html" with label="Ventas totales" value=total_general_label note="Suma del filtro activo." %}
-        {% include "components/metric_card.html" with label="Vista" value=filtro|title note="Agrupacion actual del historial." %}
+        <button class="content-card metric-card metric-card--button" id="abrirVistaAnalisis" type="button">
+            <span>Vista</span>
+            <strong>{{ filtro|title }}</strong>
+            <p>Agrupacion actual del historial.</p>
+        </button>
+        <button class="content-card metric-card metric-card--button" id="abrirConsultaVentas" type="button">
+            <span>Ventas totales</span>
+            <strong>{{ total_general_label }}</strong>
+            <p>{{ consulta_total.label }}</p>
+        </button>
     </section>
 
     <div class="dashboard-layout">
@@ -96,6 +89,51 @@
         </section>
     </div>
 </main>
+
+<dialog class="app-modal" id="consultaVentasModal">
+    <form method="get" class="modal-card">
+        <div class="section-heading">
+            <h2>Consultar ventas</h2>
+            <button class="btn btn-ghost modal-close" value="cancel" formmethod="dialog" type="submit">Cerrar</button>
+        </div>
+
+        <label for="totalTipo">Tipo de consulta</label>
+        <select name="total_tipo" id="totalTipo">
+            <option value="dia" {% if consulta_total.tipo == "dia" %}selected{% endif %}>Dia</option>
+            <option value="mes" {% if consulta_total.tipo == "mes" %}selected{% endif %}>Mes</option>
+            <option value="ano" {% if consulta_total.tipo == "año" %}selected{% endif %}>Año</option>
+        </select>
+
+        <label for="totalValor">Periodo</label>
+        <input id="totalValor" name="total_valor" value="{{ consulta_total.valor }}" required>
+
+        <div class="form-actions">
+            <button type="submit">Consultar</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Ver hoy</a>
+        </div>
+    </form>
+</dialog>
+
+<dialog class="app-modal" id="vistaAnalisisModal">
+    <form method="get" class="modal-card">
+        <div class="section-heading">
+            <h2>Vista de analisis</h2>
+            <button class="btn btn-ghost modal-close" value="cancel" formmethod="dialog" type="submit">Cerrar</button>
+        </div>
+
+        <label for="filtroAnalisis">Agrupar ventas por</label>
+        <select name="filtro" id="filtroAnalisis">
+            <option value="dia" {% if filtro == "dia" %}selected{% endif %}>Dia</option>
+            <option value="semana" {% if filtro == "semana" %}selected{% endif %}>Semana</option>
+            <option value="mes" {% if filtro == "mes" %}selected{% endif %}>Mes</option>
+            <option value="año" {% if filtro == "año" %}selected{% endif %}>Año</option>
+        </select>
+
+        <div class="form-actions">
+            <button type="submit">Ver analisis</button>
+        </div>
+    </form>
+</dialog>
 {% endblock %}
 
 {% block scripts %}
@@ -261,5 +299,37 @@ window.addEventListener('load', function() {
     const config = obtenerConfiguracionGrafica('bar');
     ventasChart = new Chart(ctx, config);
 });
+
+const consultaModal = document.getElementById('consultaVentasModal');
+const abrirConsultaVentas = document.getElementById('abrirConsultaVentas');
+const vistaAnalisisModal = document.getElementById('vistaAnalisisModal');
+const abrirVistaAnalisis = document.getElementById('abrirVistaAnalisis');
+const totalTipo = document.getElementById('totalTipo');
+const totalValor = document.getElementById('totalValor');
+
+function configurarCampoConsulta() {
+    const tipo = totalTipo.value;
+    totalValor.type = tipo === 'mes' ? 'month' : tipo === 'ano' ? 'number' : 'date';
+    totalValor.placeholder = tipo === 'ano' ? 'Ej. 2026' : '';
+    totalValor.min = tipo === 'ano' ? '2000' : '';
+    totalValor.max = tipo === 'ano' ? '2100' : '';
+    totalValor.step = tipo === 'ano' ? '1' : '';
+}
+
+abrirConsultaVentas.addEventListener('click', () => {
+    configurarCampoConsulta();
+    consultaModal.showModal();
+});
+
+abrirVistaAnalisis.addEventListener('click', () => {
+    vistaAnalisisModal.showModal();
+});
+
+totalTipo.addEventListener('change', () => {
+    totalValor.value = '';
+    configurarCampoConsulta();
+});
+
+configurarCampoConsulta();
 </script>
 {% endblock %}
