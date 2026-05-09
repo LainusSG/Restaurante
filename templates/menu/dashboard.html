@@ -134,40 +134,6 @@
         </select>
     </form>
 
-    <!-- Gráfica -->
-    <canvas id="ventasChart"></canvas>
-
-    <script>
-    const ctx = document.getElementById('ventasChart');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ labels|safe }},
-            datasets: [{
-                label: 'Ventas',
-                data: {{ valores|safe }},
-                borderWidth: 2,
-                backgroundColor: "rgba(231, 76, 60, 0.6)",
-                borderColor: "#e74c3c"
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { labels: { color: "#f5f5f5" } }
-            },
-            scales: {
-                x: { ticks: { color: "#ddd" } },
-                y: { 
-                    beginAtZero: true,
-                    ticks: { color: "#ddd" },
-                    grid: { color: "#333" }
-                }
-            }
-        }
-    });
-    </script>
-
     <!-- Tabla -->
     <h2>📄 Detalle de Ventas</h2>
     <table>
@@ -180,7 +146,7 @@
         <tbody>
          {% for d in datos %}
             <tr>
-                <td>{{ d.periodo|date:"d/m/Y" }}</td>
+                <td>{{ d.periodo_label }}</td>
                 <td>${{ d.total }}</td>
             </tr>
         {% endfor %}
@@ -207,5 +173,40 @@
             <span class="disabled">Último ⏭</span>
         {% endif %}
     </div>
+
+    <!-- Gráfica -->
+    <h2>Gráfica de Ventas</h2>
+    <canvas id="ventasChart"></canvas>
+
+    <script>
+    const ctx = document.getElementById('ventasChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Ventas',
+                data: {{ valores|safe }},
+                borderWidth: 2,
+                backgroundColor: "rgba(231, 76, 60, 0.6)",
+                borderColor: "#e74c3c"
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: "#f5f5f5" } }
+            },
+            scales: {
+                x: { ticks: { color: "#ddd" } },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: "#ddd" },
+                    grid: { color: "#333" }
+                }
+            }
+        }
+    });
+    </script>
 </body>
 </html>

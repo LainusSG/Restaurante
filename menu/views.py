@@ -1,11 +1,16 @@
+import calendar
+import json
+from datetime import date, timedelta
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Sum
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
+from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 
 from .models import Categoria, Producto, Pedido, PedidoItem, Mesa, VentaDiaria
 from .forms import CategoriaForm, ProductoForm, MesaForm
@@ -168,30 +173,84 @@ def surtir_item(request, item_id):
 # =====================
 # Dashboard de ventas
 # =====================
+def _fecha_corta(fecha):
+    return fecha.strftime("%d/%m/%Y")
+
+
+def _periodo_label(periodo, filtro):
+    inicio = periodo["inicio"] if isinstance(periodo, dict) else periodo
+    inicio = inicio.date() if hasattr(inicio, "date") else inicio
+
+    if filtro == "semana":
+        fin = periodo["fin"] if isinstance(periodo, dict) else inicio + timedelta(days=6)
+        numero_semana = periodo["numero"] if isinstance(periodo, dict) else ((inicio - date(inicio.year, 1, 1)).days // 7) + 1
+        return f"Semana {numero_semana}: {_fecha_corta(inicio)} - {_fecha_corta(fin)}"
+
+    if filtro == "mes":
+        ultimo_dia = calendar.monthrange(inicio.year, inicio.month)[1]
+        fin = date(inicio.year, inicio.month, ultimo_dia)
+        return f"{_fecha_corta(inicio)} - {_fecha_corta(fin)}"
+
+    if filtro in ("año", "aÃ±o"):
+        fin = date(inicio.year, 12, 31)
+        return f"{_fecha_corta(inicio)} - {_fecha_corta(fin)}"
+
+    return _fecha_corta(inicio)
+
+
+def _ventas_por_semana_desde_enero(ventas):
+    semanas = {}
+
+    for venta in ventas:
+        inicio_anio = date(venta.fecha.year, 1, 1)
+        numero_semana = ((venta.fecha - inicio_anio).days // 7) + 1
+        inicio = inicio_anio + timedelta(days=(numero_semana - 1) * 7)
+        fin = min(inicio + timedelta(days=6), date(venta.fecha.year, 12, 31))
+        clave = (venta.fecha.year, numero_semana)
+
+        if clave not in semanas:
+            semanas[clave] = {
+                "periodo": {"inicio": inicio, "fin": fin, "numero": numero_semana},
+                "total": 0,
+            }
+
+        semanas[clave]["total"] += venta.total
+
+    return [semanas[clave] for clave in sorted(semanas)]
+
+
 def dashboard_ventas(request):
     filtro = request.GET.get("filtro", "dia")
 
     ventas = VentaDiaria.objects.all().order_by("fecha")
 
     if filtro == "dia":
-        datos = ventas.annotate(periodo=TruncDay("fecha")).values("periodo").annotate(total=Sum("total"))
+        datos = ventas.annotate(periodo=TruncDay("fecha")).values("periodo").annotate(total=Sum("total")).order_by("periodo")
     elif filtro == "semana":
-        datos = ventas.annotate(periodo=TruncWeek("fecha")).values("periodo").annotate(total=Sum("total"))
+        datos = _ventas_por_semana_desde_enero(ventas)
     elif filtro == "mes":
-        datos = ventas.annotate(periodo=TruncMonth("fecha")).values("periodo").annotate(total=Sum("total"))
+        datos = ventas.annotate(periodo=TruncMonth("fecha")).values("periodo").annotate(total=Sum("total")).order_by("periodo")
     elif filtro == "año":
-        datos = ventas.annotate(periodo=TruncYear("fecha")).values("periodo").annotate(total=Sum("total"))
+        datos = ventas.annotate(periodo=TruncYear("fecha")).values("periodo").annotate(total=Sum("total")).order_by("periodo")
     else:
-        datos = ventas.annotate(periodo=TruncDay("fecha")).values("periodo").annotate(total=Sum("total"))
+        filtro = "dia"
+        datos = ventas.annotate(periodo=TruncDay("fecha")).values("periodo").annotate(total=Sum("total")).order_by("periodo")
 
-    labels = [d["periodo"].strftime("%d/%m/%Y") for d in datos]
+    datos = list(datos)
+    for dato in datos:
+        dato["periodo_label"] = _periodo_label(dato["periodo"], filtro)
+
+    labels = [d["periodo_label"] for d in datos]
     valores = [float(d["total"]) for d in datos]
+    paginator = Paginator(datos, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     return render(request, "menu/dashboard.html", {
         "filtro": filtro,
-        "labels": labels,
-        "valores": valores,
-        "datos": datos,
+        "labels": json.dumps(labels),
+        "valores": json.dumps(valores),
+        "datos": page_obj,
+        "page_obj": page_obj,
     })
 
 
