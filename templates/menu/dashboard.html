@@ -28,7 +28,6 @@
 
     <section class="dashboard-grid">
         {% include "components/metric_card.html" with label="Ventas totales" value=total_general_label note="Suma del filtro activo." %}
-        {% include "components/metric_card.html" with label="Registros" value=page_obj.paginator.count note="Datos encontrados para esta vista." %}
         {% include "components/metric_card.html" with label="Vista" value=filtro|title note="Agrupacion actual del historial." %}
     </section>
 
