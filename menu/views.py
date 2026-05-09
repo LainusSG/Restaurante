@@ -183,7 +183,7 @@ def _periodo_label(periodo, filtro):
 
     if filtro == "semana":
         fin = periodo["fin"] if isinstance(periodo, dict) else inicio + timedelta(days=6)
-        numero_semana = periodo["numero"] if isinstance(periodo, dict) else ((inicio - date(inicio.year, 1, 1)).days // 7) + 1
+        numero_semana = periodo["numero"] if isinstance(periodo, dict) else inicio.isocalendar()[1]
         return f"Semana {numero_semana}: {_fecha_corta(inicio)} - {_fecha_corta(fin)}"
 
     if filtro == "mes":
@@ -202,11 +202,14 @@ def _ventas_por_semana_desde_enero(ventas):
     semanas = {}
 
     for venta in ventas:
-        inicio_anio = date(venta.fecha.year, 1, 1)
-        numero_semana = ((venta.fecha - inicio_anio).days // 7) + 1
-        inicio = inicio_anio + timedelta(days=(numero_semana - 1) * 7)
-        fin = min(inicio + timedelta(days=6), date(venta.fecha.year, 12, 31))
-        clave = (venta.fecha.year, numero_semana)
+        # ISO 8601: Semana comienza lunes (1) y termina domingo (7)
+        ano_iso, numero_semana, _ = venta.fecha.isocalendar()
+        
+        # Calcular el lunes de la semana ISO
+        inicio = date.fromisocalendar(ano_iso, numero_semana, 1)  # 1 = lunes
+        fin = date.fromisocalendar(ano_iso, numero_semana, 7)     # 7 = domingo
+        
+        clave = (ano_iso, numero_semana)
 
         if clave not in semanas:
             semanas[clave] = {

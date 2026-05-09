@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>📊 Dashboard de Ventas</title>
+    <title>Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -43,13 +43,53 @@
         }
 
         /* Gráfica */
-        canvas {
-            display: block;
-            max-width: 800px;
-            margin: 0 auto 40px;
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 40px auto;
+            width: 77%;
             background: #1e1e1e;
             border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+
+        canvas {
+            max-width: 100%;
+            width: 100%;
+            height: 280px !important;
+        }
+
+        .chart-type-selector {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chart-type-selector button {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: 2px solid #e74c3c;
+            background: transparent;
+            color: #f5f5f5;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-type-selector button:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .chart-type-selector button.active {
+            background: #e74c3c;
+            color: white;
+            font-weight: bold;
         }
 
         /* Tabla */
@@ -122,7 +162,7 @@
     </style>
 </head>
 <body>
-    <h1>📊 Historial de Ventas</h1>
+    <h1>Historial de Ventas</h1>
 
     <!-- Filtros -->
     <form method="get">
@@ -135,7 +175,7 @@
     </form>
 
     <!-- Tabla -->
-    <h2>📄 Detalle de Ventas</h2>
+    <h2>Detalle de Ventas</h2>
     <table>
         <thead>
             <tr>
@@ -176,36 +216,233 @@
 
     <!-- Gráfica -->
     <h2>Gráfica de Ventas</h2>
-    <canvas id="ventasChart"></canvas>
+
+    <div class="chart-container">
+        <div style="width: 100%;">
+            <div class="chart-type-selector">
+                <button class="chart-btn active" data-tipo="bar">Barras</button>
+                <button class="chart-btn" data-tipo="pie">Circular</button>
+                <button class="chart-btn" data-tipo="area">Áreas</button>
+            </div>
+            <canvas id="ventasChart"></canvas>
+        </div>
+    </div>
 
     <script>
+    let ventasChart = null;
     const ctx = document.getElementById('ventasChart');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ labels|safe }},
-            datasets: [{
-                label: 'Ventas',
-                data: {{ valores|safe }},
-                borderWidth: 2,
-                backgroundColor: "rgba(231, 76, 60, 0.6)",
-                borderColor: "#e74c3c"
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { labels: { color: "#f5f5f5" } }
+    
+    const labels = {{ labels|safe }};
+    const valores = {{ valores|safe }};
+
+    function obtenerConfiguracionGrafica(tipo) {
+        const colorPrincipal = "rgba(231, 76, 60, 0.6)";
+        const colorBorde = "#e74c3c";
+
+        const configs = {
+            bar: {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas',
+                        data: valores,
+                        backgroundColor: colorPrincipal,
+                        borderColor: colorBorde,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: "#f5f5f5" } }
+                    },
+                    scales: {
+                        x: { ticks: { color: "#ddd" } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ddd" },
+                            grid: { color: "#333" }
+                        }
+                    }
+                }
             },
-            scales: {
-                x: { ticks: { color: "#ddd" } },
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: "#ddd" },
-                    grid: { color: "#333" }
+            line: {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas',
+                        data: valores,
+                        borderColor: colorBorde,
+                        backgroundColor: "transparent",
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointBackgroundColor: colorBorde,
+                        pointBorderColor: "#f5f5f5",
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: "#f5f5f5" } }
+                    },
+                    scales: {
+                        x: { ticks: { color: "#ddd" } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ddd" },
+                            grid: { color: "#333" }
+                        }
+                    }
+                }
+            },
+            pie: {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: [
+                            "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6",
+                            "#1abc9c", "#34495e", "#e67e22", "#c0392b", "#16a085",
+                            "#2980b9", "#27ae60", "#d35400", "#8e44ad"
+                        ],
+                        borderColor: "#1e1e1e",
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: "#f5f5f5" } }
+                    }
+                }
+            },
+            doughnut: {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: [
+                            "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6",
+                            "#1abc9c", "#34495e", "#e67e22", "#c0392b", "#16a085",
+                            "#2980b9", "#27ae60", "#d35400", "#8e44ad"
+                        ],
+                        borderColor: "#1e1e1e",
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: "#f5f5f5" } }
+                    }
+                }
+            },
+            area: {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas',
+                        data: valores,
+                        borderColor: "#2ecc71",
+                        backgroundColor: "rgba(46, 204, 113, 0.4)",
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: "#27ae60",
+                        pointBorderColor: "#f5f5f5",
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: "#f5f5f5" } }
+                    },
+                    scales: {
+                        x: { ticks: { color: "#ddd" } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ddd" },
+                            grid: { color: "#333" }
+                        }
+                    }
+                }
+            },
+            radar: {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas',
+                        data: valores,
+                        borderColor: colorBorde,
+                        backgroundColor: colorPrincipal,
+                        borderWidth: 2,
+                        pointBackgroundColor: colorBorde,
+                        pointBorderColor: "#f5f5f5",
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: "#f5f5f5" } }
+                    },
+                    scales: {
+                        r: {
+                            ticks: { color: "#ddd" },
+                            grid: { color: "#333" },
+                            beginAtZero: true
+                        }
+                    }
                 }
             }
+        };
+
+        return configs[tipo] || configs.bar;
+    }
+
+    function cambiarTipoGrafica(tipo) {
+        if (ventasChart) {
+            ventasChart.destroy();
         }
+
+        const config = obtenerConfiguracionGrafica(tipo);
+        ventasChart = new Chart(ctx, config);
+
+        // Actualizar botones activos
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-tipo="${tipo}"]`).classList.add('active');
+    }
+
+    // Agregar event listeners a los botones
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            cambiarTipoGrafica(this.dataset.tipo);
+        });
+    });
+
+    // Inicializar con gráfica de barras
+    window.addEventListener('load', function() {
+        const config = obtenerConfiguracionGrafica('bar');
+        ventasChart = new Chart(ctx, config);
     });
     </script>
 </body>
