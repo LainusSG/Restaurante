@@ -245,6 +245,8 @@ def dashboard_ventas(request):
 
     labels = [d["periodo_label"] for d in datos]
     valores = [float(d["total"]) for d in datos]
+    total_general = sum(valores)
+    total_general_label = f"${total_general:,.2f}"
     paginator = Paginator(datos, 15)
     page_obj = paginator.get_page(request.GET.get("page"))
 
@@ -252,6 +254,8 @@ def dashboard_ventas(request):
         "filtro": filtro,
         "labels": json.dumps(labels),
         "valores": json.dumps(valores),
+        "total_general": total_general,
+        "total_general_label": total_general_label,
         "datos": page_obj,
         "page_obj": page_obj,
     })

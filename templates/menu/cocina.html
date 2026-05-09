@@ -1,149 +1,29 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Pedidos en cocina</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #121212, #1b1b1b);
-            color: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-        }
+{% extends "base.html" %}
 
-        h1 {
-            text-align: center;
-            font-size: 2.4rem;
-            color: #e74c3c;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-        }
+{% block title %}Pedidos en cocina{% endblock %}
 
-        .pedido {
-            background: #1e1e1e;
-            border: 1px solid #333;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        }
+{% block page %}
+{% include "components/page_hero.html" with compact=True eyebrow="Cocina" title="Pedidos en cocina" subtitle="Da seguimiento a los pedidos activos y marca cada preparacion cuando avance." %}
 
-        .pedido h3 {
-            margin-top: 0;
-            color: #f39c12;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .pedido p {
-            margin: 6px 0;
-        }
-
-        .pedido ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 10px;
-        }
-
-        .pedido li {
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .pedido li:last-child {
-            border-bottom: none;
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-acciones {
-            display: flex;
-            gap: 8px;
-        }
-
-        .total {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin: 12px 0;
-            color: #27ae60;
-        }
-
-        .estado-preparacion {
-            color: #f39c12;
-            font-weight: bold;
-        }
-
-        .estado-entregado {
-            color: #2ecc71;
-            font-weight: bold;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        .btn-atender {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-atender:hover {
-            background: #2ecc71;
-        }
-
-        .btn-surtir {
-            background: #3498db;
-            color: white;
-        }
-        .btn-surtir:hover {
-            background: #5dade2;
-        }
-
-        .no-pedidos {
-            color: #aaa;
-            text-align: center;
-            font-size: 1.2rem;
-            margin-top: 50px;
-        }
-    </style>
-</head>
-<body>
-    <h1>👨‍🍳 Pedidos en cocina</h1>
-
-    <!-- Aquí se cargan los pedidos -->
-    <div id="pedidos-lista">
+<main class="page-shell">
+    <div id="pedidos-lista" class="kitchen-grid">
         {% include "menu/pedidos_list.html" %}
     </div>
+</main>
+{% endblock %}
 
-    <!-- Script para actualizar la lista -->
-    <script>
-        function actualizarPedidos() {
-            fetch("{% url 'pedidos_cocina_json' %}")
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("pedidos-lista").innerHTML = data.html;
-                })
-                .catch(error => console.error("Error al actualizar pedidos:", error));
-        }
+{% block scripts %}
+<script>
+    function actualizarPedidos() {
+        fetch("{% url 'pedidos_cocina_json' %}")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("pedidos-lista").innerHTML = data.html;
+            })
+            .catch(error => console.error("Error al actualizar pedidos:", error));
+    }
 
-        actualizarPedidos(); // primera carga
-        setInterval(actualizarPedidos, 3000); // cada 3s
-    </script>
-</body>
-</html>
+    actualizarPedidos();
+    setInterval(actualizarPedidos, 3000);
+</script>
+{% endblock %}

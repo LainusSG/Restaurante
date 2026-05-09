@@ -1,67 +1,20 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Ticket Pedido #{{ pedido.id }}</title>
-    <style>
-        body {
-            font-family: monospace, sans-serif;
-            font-size: 13px;
-            width: 240px; /* ajusta según impresora (58mm ≈ 230-250px) */
-            margin: auto;
-            color: #000;
-        }
-        h1 {
-            text-align: center;
-            font-size: 15px;
-            margin: 0 0 10px;
-            text-transform: uppercase;
-        }
-        hr {
-            border: none;
-            border-top: 1px dashed #000;
-            margin: 6px 0;
-        }
-        .linea {
-            display: flex;
-            justify-content: space-between;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        li {
-            margin-bottom: 4px;
-        }
-        .total {
-            text-align: right;
-            font-size: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 11px;
-        }
-        @media print {
-            button { display: none; } /* Ocultar botón en impresión */
-            body { margin: 0; }
-        }
-    </style>
-</head>
-<body>
-    <h1>🍽 Restaurante XYZ</h1>
+{% extends "base.html" %}
+
+{% block title %}Ticket Pedido #{{ pedido.id }}{% endblock %}
+{% block body_class %}receipt-page{% endblock %}
+
+{% block page %}
+<main class="ticket">
+    <h1>Restaurante XYZ</h1>
     <p><strong>Ticket:</strong> #{{ pedido.id }}</p>
     <p><strong>Fecha:</strong> {{ pedido.creado_en|date:"d/m/Y H:i" }}</p>
     <p><strong>Mesa:</strong> {{ pedido.mesa.nombre }}</p>
 
     <hr>
-    <ul>
+    <ul class="clean-list">
         {% for item in pedido.items.all %}
-            <li class="linea">
-                <span>{{ item.cantidad }}x {{ item.producto.nombre }} <br> <small style="color:#aaa;">{{ item.observaciones }}</small></span>
+            <li class="ticket-line">
+                <span>{{ item.cantidad }}x {{ item.producto.nombre }}<br><small>{{ item.observaciones }}</small></span>
                 <span>${{ item.subtotal }}</span>
             </li>
         {% endfor %}
@@ -69,21 +22,21 @@
     <hr>
     <p class="total">TOTAL: ${{ pedido.total }}</p>
     <hr>
-    <div class="footer">
-        ¡Gracias por tu compra!  
-        <br>🛎 Restaurante XYZ
+    <div class="ticket-footer">
+        Gracias por tu compra<br>Restaurante XYZ
     </div>
 
-    <button onclick="imprimirYVolver()">🖨 Imprimir Ticket</button>
+    <button onclick="imprimirYVolver()" type="button" class="btn">Imprimir ticket</button>
+</main>
+{% endblock %}
 
+{% block scripts %}
 <script>
 function imprimirYVolver() {
     window.print();
-    // Espera un poco para que dé tiempo a la impresión antes de redirigir
     setTimeout(() => {
         window.location.href = "{% url 'seleccionar_mesa' %}";
     }, 500);
 }
 </script>
-</body>
-</html>
+{% endblock %}

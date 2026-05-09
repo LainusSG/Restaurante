@@ -1,470 +1,266 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #121212;
-            color: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-        }
+{% extends "base.html" %}
 
-        h1, h2 {
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
+{% block title %}Dashboard de ventas{% endblock %}
+{% block body_class %}app-page dashboard-page{% endblock %}
 
-        h1 { color: #e74c3c; }
-        h2 { color: #3498db; }
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
-        /* Filtros */
-        form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+{% block page %}
+{% include "components/page_hero.html" with compact=True eyebrow="Analitica" title="Historial de ventas" subtitle="Consulta el comportamiento de ventas por dia, semana, mes o año." %}
 
-        select {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            background: #1e1e1e;
-            color: #f5f5f5;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        select:focus {
-            outline: 2px solid #e74c3c;
-        }
-
-        /* Gráfica */
-        .chart-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin: 40px auto;
-            width: 77%;
-            background: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-        }
-
-        canvas {
-            max-width: 100%;
-            width: 100%;
-            height: 280px !important;
-        }
-
-        .chart-type-selector {
-            text-align: center;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .chart-type-selector button {
-            padding: 8px 15px;
-            border-radius: 6px;
-            border: 2px solid #e74c3c;
-            background: transparent;
-            color: #f5f5f5;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .chart-type-selector button:hover {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .chart-type-selector button.active {
-            background: #e74c3c;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Tabla */
-        .table-container {
-            width: 80%;
-            margin: 0 auto;
-        }
-
-        table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-            background: #1e1e1e;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-        }
-
-        col.period-col {
-            width: 50%;
-        }
-
-        col.total-col {
-            width: 50%;
-        }
-
-        thead {
-            background: #e74c3c;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        th {
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background: #2a2a2a;
-        }
-
-        tr:nth-child(odd) {
-            background: #1e1e1e;
-        }
-
-        td {
-            color: #ddd;
-            overflow-wrap: anywhere;
-        }
-
-        /* Paginador */
-        .pagination {
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .pagination a, .pagination span {
-            padding: 8px 12px;
-            background: #1e1e1e;
-            color: #f5f5f5;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .pagination a:hover {
-            background: #e74c3c;
-        }
-
-        .pagination .active {
-            background: #e74c3c;
-            font-weight: bold;
-        }
-
-        .pagination .disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<body>
-    <h1>Historial de Ventas</h1>
-
-    <!-- Filtros -->
-    <form method="get">
-        <select name="filtro" onchange="this.form.submit()">
-            <option value="dia" {% if filtro == "dia" %}selected{% endif %}>Por Día</option>
-            <option value="semana" {% if filtro == "semana" %}selected{% endif %}>Por Semana</option>
-            <option value="mes" {% if filtro == "mes" %}selected{% endif %}>Por Mes</option>
-            <option value="año" {% if filtro == "año" %}selected{% endif %}>Por Año</option>
-        </select>
-    </form>
-
-    <!-- Tabla -->
-    <h2>Detalle de Ventas</h2>
-    <div class="table-container">
-        <table>
-            <colgroup>
-                <col class="period-col">
-                <col class="total-col">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th>Periodo</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-             {% for d in datos %}
-                <tr>
-                    <td>{{ d.periodo_label }}</td>
-                    <td>${{ d.total }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Paginador -->
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-            <a href="?page=1&filtro={{ filtro }}">⏮ Primero</a>
-            <a href="?page={{ page_obj.previous_page_number }}&filtro={{ filtro }}">⬅ Anterior</a>
-        {% else %}
-            <span class="disabled">⏮ Primero</span>
-            <span class="disabled">⬅ Anterior</span>
-        {% endif %}
-
-        <span class="active">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&filtro={{ filtro }}">Siguiente ➡</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}&filtro={{ filtro }}">Último ⏭</a>
-        {% else %}
-            <span class="disabled">Siguiente ➡</span>
-            <span class="disabled">Último ⏭</span>
-        {% endif %}
-    </div>
-
-    <!-- Gráfica -->
-    <h2>Gráfica de Ventas</h2>
-
-    <div class="chart-container">
-        <div style="width: 100%;">
-            <div class="chart-type-selector">
-                <button class="chart-btn active" data-tipo="bar">Barras</button>
-                <button class="chart-btn" data-tipo="pie">Circular</button>
-                <button class="chart-btn" data-tipo="area">Áreas</button>
-            </div>
-            <canvas id="ventasChart"></canvas>
+<main class="page-shell">
+    <section class="dashboard-toolbar content-card">
+        <div>
+            <span class="eyebrow-light">Reporte</span>
+            <h2>Resumen de ventas</h2>
         </div>
+        <form method="get" class="filter-form">
+            <select name="filtro" onchange="this.form.submit()">
+                <option value="dia" {% if filtro == "dia" %}selected{% endif %}>Por dia</option>
+                <option value="semana" {% if filtro == "semana" %}selected{% endif %}>Por semana</option>
+                <option value="mes" {% if filtro == "mes" %}selected{% endif %}>Por mes</option>
+                <option value="año" {% if filtro == "año" %}selected{% endif %}>Por año</option>
+            </select>
+        </form>
+    </section>
+
+    <section class="dashboard-grid">
+        {% include "components/metric_card.html" with label="Ventas totales" value=total_general_label note="Suma del filtro activo." %}
+        {% include "components/metric_card.html" with label="Registros" value=page_obj.paginator.count note="Datos encontrados para esta vista." %}
+        {% include "components/metric_card.html" with label="Vista" value=filtro|title note="Agrupacion actual del historial." %}
+    </section>
+
+    <div class="dashboard-layout">
+        <section class="table-card dashboard-panel dashboard-panel--table">
+            <div class="section-heading">
+                <h2>Detalle de ventas</h2>
+                <p>Maximo 15 registros por pagina</p>
+            </div>
+            <div class="table-container">
+                <table>
+                    <colgroup>
+                        <col class="period-col">
+                        <col class="total-col">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Periodo</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                     {% for d in datos %}
+                        <tr>
+                            <td>{{ d.periodo_label }}</td>
+                            <td>${{ d.total }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1&filtro={{ filtro }}">Primero</a>
+                    <a href="?page={{ page_obj.previous_page_number }}&filtro={{ filtro }}">Anterior</a>
+                {% else %}
+                    <span class="disabled">Primero</span>
+                    <span class="disabled">Anterior</span>
+                {% endif %}
+
+                <span class="active">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&filtro={{ filtro }}">Siguiente</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}&filtro={{ filtro }}">Ultimo</a>
+                {% else %}
+                    <span class="disabled">Siguiente</span>
+                    <span class="disabled">Ultimo</span>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="content-card dashboard-panel dashboard-panel--chart">
+            <div class="section-heading">
+                <h2>Grafica de ventas</h2>
+            </div>
+            <div class="chart-container">
+                <div class="chart-type-selector">
+                    <button class="chart-btn active" data-tipo="bar" type="button">Barras</button>
+                    <button class="chart-btn" data-tipo="pie" type="button">Circular</button>
+                    <button class="chart-btn" data-tipo="area" type="button">Areas</button>
+                </div>
+                <canvas id="ventasChart"></canvas>
+            </div>
+        </section>
     </div>
+</main>
+{% endblock %}
 
-    <script>
-    let ventasChart = null;
-    const ctx = document.getElementById('ventasChart');
-    
-    const labels = {{ labels|safe }};
-    const valores = {{ valores|safe }};
+{% block scripts %}
+<script>
+let ventasChart = null;
+const ctx = document.getElementById('ventasChart');
 
-    function obtenerConfiguracionGrafica(tipo) {
-        const colorPrincipal = "rgba(231, 76, 60, 0.6)";
-        const colorBorde = "#e74c3c";
+const labels = {{ labels|safe }};
+const valores = {{ valores|safe }};
 
-        const configs = {
-            bar: {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Ventas',
-                        data: valores,
-                        backgroundColor: colorPrincipal,
-                        borderColor: colorBorde,
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: "#f5f5f5" } }
-                    },
-                    scales: {
-                        x: { ticks: { color: "#ddd" } },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: "#ddd" },
-                            grid: { color: "#333" }
-                        }
-                    }
-                }
+function obtenerConfiguracionGrafica(tipo) {
+    const colorPrincipal = "rgba(217, 75, 43, 0.68)";
+    const colorBorde = "#d94b2b";
+    const colorTexto = "#2d2a26";
+    const colorGrid = "#eadfd4";
+
+    const configs = {
+        bar: {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ventas',
+                    data: valores,
+                    backgroundColor: colorPrincipal,
+                    borderColor: colorBorde,
+                    borderWidth: 2,
+                }]
             },
-            line: {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Ventas',
-                        data: valores,
-                        borderColor: colorBorde,
-                        backgroundColor: "transparent",
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: colorBorde,
-                        pointBorderColor: "#f5f5f5",
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                    }]
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: colorTexto } }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: "#f5f5f5" } }
-                    },
-                    scales: {
-                        x: { ticks: { color: "#ddd" } },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: "#ddd" },
-                            grid: { color: "#333" }
-                        }
-                    }
-                }
-            },
-            pie: {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: valores,
-                        backgroundColor: [
-                            "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6",
-                            "#1abc9c", "#34495e", "#e67e22", "#c0392b", "#16a085",
-                            "#2980b9", "#27ae60", "#d35400", "#8e44ad"
-                        ],
-                        borderColor: "#1e1e1e",
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: "#f5f5f5" } }
-                    }
-                }
-            },
-            doughnut: {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: valores,
-                        backgroundColor: [
-                            "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6",
-                            "#1abc9c", "#34495e", "#e67e22", "#c0392b", "#16a085",
-                            "#2980b9", "#27ae60", "#d35400", "#8e44ad"
-                        ],
-                        borderColor: "#1e1e1e",
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: "#f5f5f5" } }
-                    }
-                }
-            },
-            area: {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Ventas',
-                        data: valores,
-                        borderColor: "#2ecc71",
-                        backgroundColor: "rgba(46, 204, 113, 0.4)",
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: "#27ae60",
-                        pointBorderColor: "#f5f5f5",
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: "#f5f5f5" } }
-                    },
-                    scales: {
-                        x: { ticks: { color: "#ddd" } },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: "#ddd" },
-                            grid: { color: "#333" }
-                        }
-                    }
-                }
-            },
-            radar: {
-                type: 'radar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Ventas',
-                        data: valores,
-                        borderColor: colorBorde,
-                        backgroundColor: colorPrincipal,
-                        borderWidth: 2,
-                        pointBackgroundColor: colorBorde,
-                        pointBorderColor: "#f5f5f5",
-                        pointRadius: 4,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: "#f5f5f5" } }
-                    },
-                    scales: {
-                        r: {
-                            ticks: { color: "#ddd" },
-                            grid: { color: "#333" },
-                            beginAtZero: true
-                        }
+                scales: {
+                    x: { ticks: { color: colorTexto }, grid: { color: colorGrid } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: colorTexto },
+                        grid: { color: colorGrid }
                     }
                 }
             }
-        };
-
-        return configs[tipo] || configs.bar;
-    }
-
-    function cambiarTipoGrafica(tipo) {
-        if (ventasChart) {
-            ventasChart.destroy();
+        },
+        line: {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ventas',
+                    data: valores,
+                    borderColor: colorBorde,
+                    backgroundColor: "transparent",
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: colorBorde,
+                    pointBorderColor: "#fff",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: colorTexto } }
+                },
+                scales: {
+                    x: { ticks: { color: colorTexto }, grid: { color: colorGrid } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: colorTexto },
+                        grid: { color: colorGrid }
+                    }
+                }
+            }
+        },
+        pie: {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: valores,
+                    backgroundColor: [
+                        "#d94b2b", "#316f9f", "#2f8f5b", "#e6a13a", "#7b5ba6",
+                        "#b65c38", "#4c6f64", "#b93228", "#8b6f47", "#2a8c85",
+                        "#6c7a89", "#ad7a99", "#d4745f", "#597d35"
+                    ],
+                    borderColor: "#fffaf5",
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: colorTexto } }
+                }
+            }
+        },
+        area: {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ventas',
+                    data: valores,
+                    borderColor: "#2f8f5b",
+                    backgroundColor: "rgba(47, 143, 91, 0.18)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: "#2f8f5b",
+                    pointBorderColor: "#fff",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: colorTexto } }
+                },
+                scales: {
+                    x: { ticks: { color: colorTexto }, grid: { color: colorGrid } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: colorTexto },
+                        grid: { color: colorGrid }
+                    }
+                }
+            }
         }
+    };
 
-        const config = obtenerConfiguracionGrafica(tipo);
-        ventasChart = new Chart(ctx, config);
+    return configs[tipo] || configs.bar;
+}
 
-        // Actualizar botones activos
-        document.querySelectorAll('.chart-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-tipo="${tipo}"]`).classList.add('active');
+function cambiarTipoGrafica(tipo) {
+    if (ventasChart) {
+        ventasChart.destroy();
     }
 
-    // Agregar event listeners a los botones
-    document.querySelectorAll('.chart-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            cambiarTipoGrafica(this.dataset.tipo);
-        });
-    });
+    const config = obtenerConfiguracionGrafica(tipo);
+    ventasChart = new Chart(ctx, config);
 
-    // Inicializar con gráfica de barras
-    window.addEventListener('load', function() {
-        const config = obtenerConfiguracionGrafica('bar');
-        ventasChart = new Chart(ctx, config);
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
-    </script>
-</body>
-</html>
+    document.querySelector(`[data-tipo="${tipo}"]`).classList.add('active');
+}
+
+document.querySelectorAll('.chart-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        cambiarTipoGrafica(this.dataset.tipo);
+    });
+});
+
+window.addEventListener('load', function() {
+    const config = obtenerConfiguracionGrafica('bar');
+    ventasChart = new Chart(ctx, config);
+});
+</script>
+{% endblock %}

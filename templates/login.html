@@ -1,70 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #121212; /* Fondo oscuro */
-            color: #e0e0e0;      /* Texto gris claro */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-box {
-            background: #1e1e1e; /* Caja oscura */
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            width: 320px;
-        }
-        .login-box h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #ffffff;
-        }
-        .login-box input {
-            width: 92%;
-            padding: 12px;
-            margin: 12px 0;
-            border: none;
-            border-radius: 6px;
-            background: #2a2a2a;
-            color: #ffffff;
-        }
-        .login-box input:focus {
-            outline: none;
-            background: #333333;
-            box-shadow: 0 0 0 2px #007bff;
-        }
-        .login-box button {
-            width: 100%;
-            padding: 12px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .login-box button:hover {
-            background: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-box">
-        <h2>🔑 Iniciar Sesión</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Ingresar</button>
-        </form>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesion{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block page %}
+<main class="form-card">
+    <h1>Iniciar sesion</h1>
+    <form method="post" class="app-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Ingresar</button>
+    </form>
+</main>
+{% endblock %}
