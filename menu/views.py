@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
@@ -376,12 +377,11 @@ def editar_categoria(request, categoria_id):
 
 
 @login_required
+@require_http_methods(["POST"])
 def eliminar_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
-    if request.method == "POST":
-        categoria.delete()
-        return redirect("crear_menu")
-    return render(request, "menu/eliminar_categoria.html", {"categoria": categoria})
+    categoria.delete()
+    return redirect("crear_menu")
 
 
 def editar_producto(request, producto_id):
@@ -396,12 +396,11 @@ def editar_producto(request, producto_id):
     return render(request, "menu/editar_producto.html", {"form": form, "producto": producto})
 
 
+@require_http_methods(["POST"])
 def eliminar_producto(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
-    if request.method == "POST":
-        producto.delete()
-        return redirect("crear_menu")
-    return render(request, "menu/eliminar_producto.html", {"producto": producto})
+    producto.delete()
+    return redirect("crear_menu")
 
 
 # =====================

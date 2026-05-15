@@ -1,16 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}Editar categoria{% endblock %}
+{% block title %}Editar categoría{% endblock %}
 {% block body_class %}center-page{% endblock %}
 
 {% block page %}
 <main class="form-card">
-    <h1>Editar categoria</h1>
+    <h1>Editar categoría</h1>
+    <p style="text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 24px;">Modifica la información de esta categoría</p>
+    
     <form method="post" class="app-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Guardar cambios</button>
+        
+        {% for field in form %}
+            <div class="form-group">
+                <div class="form-group__label-row">
+                    {{ field.label_tag }}
+                    {% if field.help_text %}
+                        <span class="form-help">{{ field.help_text|safe }}</span>
+                    {% endif %}
+                </div>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="form-errors">
+                        {% for error in field.errors %}
+                            <p class="error-text">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                <strong>Error al guardar:</strong>
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="form-actions" style="margin-top: 28px;">
+            <button type="submit" class="btn">Guardar cambios</button>
+            <a href="{% url 'crear_menu' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
     </form>
-    <a href="{% url 'crear_menu' %}" class="back-link">Volver al menu</a>
 </main>
 {% endblock %}

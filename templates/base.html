@@ -13,6 +13,7 @@
 </head>
 <body class="{% block body_class %}app-page{% endblock %}">
     {% block page %}{% endblock %}
+    {% include "components/confirm_modal.html" %}
     {% block scripts %}{% endblock %}
 </body>
 </html>
