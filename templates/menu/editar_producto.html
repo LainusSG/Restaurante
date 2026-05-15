@@ -4,43 +4,29 @@
 {% block body_class %}center-page{% endblock %}
 
 {% block page %}
-<main class="form-card">
-    <h1>Editar producto</h1>
-    <p style="text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 24px;">Modifica la información de este producto del menú</p>
+<main class="form-card modern-form">
+    <div class="form-card__header">
+        <h1>Editar producto</h1>
+        <p>Modifica la información de este producto del menú</p>
+    </div>
     
     <form method="post" enctype="multipart/form-data" class="app-form">
         {% csrf_token %}
         
         {% for field in form %}
-            <div class="form-group">
-                <div class="form-group__label-row">
-                    {{ field.label_tag }}
-                    {% if field.help_text %}
-                        <span class="form-help">{{ field.help_text|safe }}</span>
-                    {% endif %}
-                </div>
-                {{ field }}
-                {% if field.errors %}
-                    <div class="form-errors">
-                        {% for error in field.errors %}
-                            <p class="error-text">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+            {% include "components/form_field.html" with field=field %}
         {% endfor %}
         
         {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                <strong>Error al guardar:</strong>
+            <div class="form-alert form-alert--error">
                 {% for error in form.non_field_errors %}
                     <p>{{ error }}</p>
                 {% endfor %}
             </div>
         {% endif %}
         
-        <div class="form-actions" style="margin-top: 28px;">
-            <button type="submit" class="btn">Guardar cambios</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
             <a href="{% url 'crear_menu' %}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
